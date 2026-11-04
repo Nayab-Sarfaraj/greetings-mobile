@@ -5,6 +5,7 @@ import type { VideoProps } from "@greetings/remotion/schema";
 export type SavedInvitation = {
   id: string;
   templateId: string;
+  shareId?: string;
   props: VideoProps;
   hostContact?: { method: "email" | "whatsapp" | "sms"; value: string };
   status: string;

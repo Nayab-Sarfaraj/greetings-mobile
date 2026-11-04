@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { requireUser } from "../../middleware/auth";
 import { errorResponse } from "../../lib/errors";
 import { validate } from "../../lib/validation";
@@ -58,10 +59,11 @@ export async function update(request: Request, context: Context) {
 }
 export async function remove(_request: Request, context: Context) {
   try {
-    await invitationService.delete(
+    const deleted = await invitationService.delete(
       await requireUser(),
       (await context.params).id,
     );
+    if (deleted.shareId) revalidatePath(`/c/${String(deleted.shareId)}`);
     return new Response(null, { status: 204 });
   } catch (error) {
     return errorResponse(error);

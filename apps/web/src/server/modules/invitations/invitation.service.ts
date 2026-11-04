@@ -44,6 +44,7 @@ export function createInvitationService(
       const item = await repository.delete(owner, id);
       if (!item) throw new NotFoundError();
       await cleanInvitation(owner, id);
+      return item;
     },
   };
 }

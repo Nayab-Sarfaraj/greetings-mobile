@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { Webhook } from "svix";
 import { getAuthConfig } from "../../lib/config";
 import { errorResponse, ValidationError } from "../../lib/errors";
@@ -22,7 +23,10 @@ export async function receive(request: Request) {
     if (!parsed.data?.id) throw new ValidationError("Invalid event");
     if (parsed.type === "user.created")
       await accountRepository.upsert(parsed.data.id);
-    if (parsed.type === "user.deleted") await purgeAccount(parsed.data.id);
+    if (parsed.type === "user.deleted") {
+      await purgeAccount(parsed.data.id);
+      revalidatePath("/c/[id]", "page");
+    }
     return Response.json({ received: true });
   } catch (error) {
     return errorResponse(error);

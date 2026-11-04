@@ -1,3 +1,4 @@
+import { publishResults } from "../results/publication.service";
 import { renderRepository } from "./render.repository";
 import { invitationInput } from "../invitations/invitation.schema";
 import { mediaUrl, removeMedia } from "../../integrations/local-storage.client";
@@ -28,6 +29,9 @@ export async function processNextRender(
     if (!result.modifiedCount) {
       await Promise.all([removeMedia(video), removeMedia(poster)]);
     } else {
+      await publishResults(job.ownerClerkId, id).catch(() =>
+        log("error", "render.publication-deferred", { renderId: id }),
+      );
       log("info", "render.completed", {
         renderId: id,
         elapsedMs: Date.now() - started,

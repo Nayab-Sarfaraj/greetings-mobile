@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { clerkClient } from "@clerk/nextjs/server";
 import { requireUser } from "../../middleware/auth";
 import { errorResponse } from "../../lib/errors";
@@ -7,6 +8,7 @@ export async function remove() {
     const owner = await requireUser();
     await (await clerkClient()).users.deleteUser(owner);
     await purgeAccount(owner);
+    revalidatePath("/c/[id]", "page");
     return new Response(null, { status: 204 });
   } catch (error) {
     return errorResponse(error);

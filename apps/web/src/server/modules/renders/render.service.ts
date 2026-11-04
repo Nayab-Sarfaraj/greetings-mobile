@@ -1,3 +1,4 @@
+import { bindResult, publishResults } from "../results/publication.service";
 import { validate } from "../../lib/validation";
 import { createHash } from "node:crypto";
 import { invitationService } from "../invitations/invitation.service";
@@ -25,6 +26,7 @@ const defaultDependencies = {
   renders: renderRepository,
   limit: rateLimit,
   checkPhoto: assertOwnedPhoto,
+  bindResult,
 };
 export function createRenderService(deps: typeof defaultDependencies) {
   return {
@@ -55,6 +57,7 @@ export function createRenderService(deps: typeof defaultDependencies) {
       const cached = await deps.renders.find(owner, propsHash);
       if (cached && cached.status !== "failed") {
         await deps.renders.attach(owner, propsHash, id);
+        await deps.bindResult(owner, id, cached);
         return cached;
       }
       await deps.limit(`render:${owner}`, 10);
@@ -67,20 +70,27 @@ export function createRenderService(deps: typeof defaultDependencies) {
         const retried = await deps.renders.retry(owner, propsHash);
         if (!retried) {
           const current = await deps.renders.find(owner, propsHash);
-          if (current && current.status !== "failed") return current;
+          if (current && current.status !== "failed") {
+            await deps.bindResult(owner, id, current);
+            return current;
+          }
           throw new RateLimitError(
             "This video has reached its retry limit. Change the content before exporting again.",
           );
         }
+        await deps.bindResult(owner, id, retried);
         return retried;
       }
-      return deps.renders.enqueue(owner, id, propsHash, input);
+      const job = await deps.renders.enqueue(owner, id, propsHash, input);
+      if (job) await deps.bindResult(owner, id, job);
+      return job;
     },
     async get(owner: string, id: string) {
       if (!/^[a-f0-9]{24}$/i.test(id)) throw new NotFoundError();
       await deps.renders.sweep();
       const item = await deps.renders.get(owner, id);
       if (!item) throw new NotFoundError();
+      if (item.status === "ready") await publishResults(owner, id);
       return item;
     },
   };

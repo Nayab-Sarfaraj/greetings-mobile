@@ -19,7 +19,7 @@ function setup() {
   };
   const limit = vi.fn();
   const checkPhoto = vi.fn();
-  const deps = { invitations, renders, limit, checkPhoto };
+  const deps = { invitations, renders, limit, checkPhoto, bindResult: vi.fn() };
   return {
     ...deps,
     service: createRenderService(

@@ -72,6 +72,11 @@ function AuthenticatedDashboard() {
                   )}
                 </p>
               ))}
+            {item.shareId && (
+              <Link href={`/c/${item.shareId}`} className="mr-4 underline">
+                Open result page
+              </Link>
+            )}
             <Link
               href={`/create/${item.templateId}?draft=${item.id}`}
               className="mr-4 underline"

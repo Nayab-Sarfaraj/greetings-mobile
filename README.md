@@ -34,3 +34,7 @@ To exercise the real local pipeline against a separate test database, with fixtu
 ```sh
 MONGODB_URI=mongodb://127.0.0.1:27017/greetings_stage4_test LOCAL_MEDIA_DIR=./.media-stage4-test pnpm --filter @greetings/web exec tsx scripts/verify-render-pipeline.ts
 ```
+
+## Public result pages
+
+After an export finishes, choose **Open shareable result** in the editor, or **Open result page** in the dashboard. Recipients can watch, download, share, or make their own creation without signing in. Set `APP_BASE_URL` to the deployed HTTPS origin before testing link previews in messaging apps. Details and QA coverage are in `docs/stage-5.md`.

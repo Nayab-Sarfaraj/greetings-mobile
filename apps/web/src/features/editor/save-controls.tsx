@@ -1,4 +1,5 @@
 "use client";
+import { CreatorResultLink } from "../results/creator-result-link";
 import { SignInButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useAuthEnabled } from "@/components/providers";
@@ -12,7 +13,7 @@ type Props = {
 };
 function Controls({ input, photo, initialId, invalid }: Props) {
   const { isLoaded, isSignedIn } = useUser();
-  const { saveDraft, exportVideo, job, busy } = useExportCreation(
+  const { saveDraft, exportVideo, job, busy, savedId } = useExportCreation(
     input,
     photo,
     initialId,
@@ -80,6 +81,9 @@ function Controls({ input, photo, initialId, invalid }: Props) {
               >
                 Download video
               </a>
+              {savedId && (
+                <CreatorResultLink key={job.data.id} invitationId={savedId} />
+              )}
             </>
           )}
         </div>

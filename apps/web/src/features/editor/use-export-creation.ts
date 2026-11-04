@@ -74,6 +74,7 @@ export function useExportCreation(
     saveDraft,
     exportVideo,
     job,
+    savedId,
     busy: saveDraft.isPending || exportVideo.isPending,
   };
 }
