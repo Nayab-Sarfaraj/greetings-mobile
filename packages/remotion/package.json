@@ -1,0 +1,32 @@
+{
+  "name": "@greetings/remotion",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./templates": "./src/templates.ts",
+    "./schema": "./src/schema.ts",
+    "./composition": "./src/composition.tsx"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run --passWithNoTests",
+    "studio": "remotion studio src/root.tsx"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "typescript": "~6.0.3",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@greetings/shared": "workspace:*",
+    "@remotion/cli": "^4.0.540",
+    "@remotion/google-fonts": "^4.0.540",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remotion": "^4.0.540",
+    "zod": "^4.6.7"
+  }
+}
