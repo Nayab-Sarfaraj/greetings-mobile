@@ -189,6 +189,8 @@ Short, opaque ids for public links: `/c/[id]` uses a nanoid. `/i/[token]` uses a
 
 ## 8. Render pipeline (LOCKED: Remotion Lambda)
 
+During local development, authenticated uploads use local file storage and a separate Remotion worker processes MongoDB jobs. This adapter exercises validation, ownership, caching, watermarking, retries, and polling without AWS. Lambda, S3, and webhook setup remain the production target.
+
 - Render only when the user exports, shares, or downloads. Preview is always the Player, which costs nothing.
 - Flow: client requests render → service validates props and entitlements → computes `propsHash` → returns the cached render if one exists → otherwise starts a Lambda render and stores a `renders` row → completion arrives through the Remotion webhook (verify the signature) → status updates → the client polls or subscribes for status.
 - **Cache renders by props hash** so identical inputs never re-render.
@@ -350,7 +352,7 @@ Keep one `design-tokens.ts` in `packages/shared` as the single source for web (T
 
 1. Monorepo scaffold, config, logger, error handling, DB connection.
 2. `packages/remotion`: theme tokens, floral SVG components, one template (card and invitation).
-3. Editor and Player preview. **Do a test render on Lambda early** to measure real cost and speed.
+3. Editor and Player preview with local Remotion test renders. Measure Lambda cost and speed when AWS is configured for the Phase 4 render pipeline.
 4. Render pipeline: validation, props hash cache, webhook, status.
 5. Result page `/c/[id]` with Open Graph tags, download, Web Share, "Make your own".
 6. Clerk auth with sign-in only at export and purchase.

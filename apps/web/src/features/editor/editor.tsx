@@ -8,6 +8,8 @@ import {
   invitationSchema,
   type VideoProps,
 } from "@greetings/remotion";
+import { SaveControls } from "./save-controls";
+import type { SavedInvitation } from "./use-invitations";
 const Preview = dynamic(() => import("./preview"), {
   ssr: false,
   loading: () => (
@@ -38,23 +40,42 @@ const limits: Record<string, number> = {
   hostName: 40,
   locationText: 120,
 };
-export default function Editor({ templateId }: { templateId: string }) {
+export default function Editor({
+  templateId,
+  initial,
+}: {
+  templateId: string;
+  initial?: SavedInvitation;
+}) {
   const template = getTemplate(templateId)!;
-  const [fields, setFields] = useState<VideoProps>(template.defaultProps);
+  const [fields, setFields] = useState<VideoProps>(
+    initial?.props ?? template.defaultProps,
+  );
   const [previewProps, setPreviewProps] = useState<VideoProps>(
     template.defaultProps,
   );
-  const [photo, setPhoto] = useState<string>();
-  const [contactMethod, setContactMethod] = useState<ContactMethod>("email");
-  const [contactValue, setContactValue] = useState("");
+  const [photo, setPhoto] = useState<string | undefined>(
+    initial?.props.photoUrl,
+  );
+  const [photoError, setPhotoError] = useState("");
+  const [contactMethod, setContactMethod] = useState<ContactMethod>(
+    initial?.hostContact?.method ?? "email",
+  );
+  const [contactValue, setContactValue] = useState(
+    initial?.hostContact?.value ?? "",
+  );
   const [ready, setReady] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => {
       const saved = localStorage.getItem(`draft:${templateId}`);
-      if (saved) {
+      if (saved && !initial) {
         try {
           const parsed = JSON.parse(saved);
-          setFields({ ...template.defaultProps, ...parsed.fields });
+          const candidate = { ...template.defaultProps, ...parsed.fields };
+          const valid = (
+            template.type === "card" ? cardSchema : invitationSchema
+          ).safeParse(candidate);
+          if (valid.success) setFields(valid.data);
           setContactMethod(parsed.contactMethod ?? "email");
           setContactValue(parsed.contactValue ?? "");
         } catch {
@@ -64,7 +85,7 @@ export default function Editor({ templateId }: { templateId: string }) {
       setReady(true);
     }, 0);
     return () => clearTimeout(timer);
-  }, [templateId, template.defaultProps]);
+  }, [templateId, template.defaultProps, template.type, initial]);
   useEffect(() => {
     if (ready)
       localStorage.setItem(
@@ -99,6 +120,15 @@ export default function Editor({ templateId }: { templateId: string }) {
           ]),
         );
   }, [fields, template.type]);
+  const contactError = !contactValue.trim()
+    ? "Enter a way guests can reply."
+    : contactMethod === "email" &&
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactValue)
+      ? "Enter a valid email address."
+      : contactMethod !== "email" &&
+          !/^\+?[0-9\s().-]{7,20}$/.test(contactValue)
+        ? "Enter a valid phone number with country code."
+        : "";
   const keys =
     template.type === "card"
       ? ["senderName", "recipientName", "message"]
@@ -115,6 +145,11 @@ export default function Editor({ templateId }: { templateId: string }) {
   }
   async function choosePhoto(file?: File) {
     if (!file) return;
+    setPhotoError("");
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setPhotoError("Choose a JPEG, PNG, or WebP photo.");
+      return;
+    }
     const img = new Image();
     const url = URL.createObjectURL(file);
     try {
@@ -144,6 +179,8 @@ export default function Editor({ templateId }: { templateId: string }) {
         if (old) URL.revokeObjectURL(old);
         return URL.createObjectURL(blob);
       });
+    } catch {
+      setPhotoError("This photo could not be opened. Choose another one.");
     } finally {
       URL.revokeObjectURL(url);
     }
@@ -160,6 +197,22 @@ export default function Editor({ templateId }: { templateId: string }) {
           <Preview templateId={templateId} props={previewProps} />
         </section>
         <section className="space-y-5">
+          <SaveControls
+            input={{
+              templateId,
+              props: fields,
+              hostContact:
+                template.type === "invitation"
+                  ? { method: contactMethod, value: contactValue }
+                  : undefined,
+            }}
+            photo={photo}
+            initialId={initial?.id}
+            invalid={
+              Object.keys(errors).length > 0 ||
+              (template.type === "invitation" && Boolean(contactError))
+            }
+          />
           {keys.map((key) => {
             const value = String(
               (fields as unknown as Record<string, unknown>)[key] ?? "",
@@ -202,6 +255,12 @@ export default function Editor({ templateId }: { templateId: string }) {
                 {errors[key] && (
                   <p className="mt-1 text-sm text-red-800">{errors[key]}</p>
                 )}
+                {key === "dateTime" && (
+                  <p className="mt-1 text-sm">
+                    Use ISO date, time, and offset, for example
+                    2026-11-26T18:00:00-05:00.
+                  </p>
+                )}
               </div>
             );
           })}
@@ -219,6 +278,11 @@ export default function Editor({ templateId }: { templateId: string }) {
             <p className="mt-1 text-sm">
               Photo stays on this device during preview.
             </p>
+            {photoError && (
+              <p role="alert" className="mt-1 text-sm text-red-800">
+                {photoError}
+              </p>
+            )}
           </div>
           {template.type === "invitation" && (
             <div className="rounded-xl border border-ink/30 p-4">
@@ -245,8 +309,15 @@ export default function Editor({ templateId }: { templateId: string }) {
                 id="contact-value"
                 value={contactValue}
                 onChange={(event) => setContactValue(event.target.value)}
+                aria-invalid={Boolean(contactError)}
+                aria-describedby={contactError ? "contact-error" : undefined}
                 className="mt-2 w-full rounded-lg border p-3"
               />
+              {contactError && (
+                <p id="contact-error" className="mt-1 text-sm text-red-800">
+                  {contactError}
+                </p>
+              )}
               <p className="mt-2 text-sm">
                 Guests with your link will see this contact information.
               </p>

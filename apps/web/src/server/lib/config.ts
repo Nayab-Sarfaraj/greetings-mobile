@@ -16,3 +16,35 @@ export function getConfig() {
     );
   return result.data;
 }
+
+const clerkSchema = z.object({
+  publishableKey: z.string().startsWith("pk_"),
+  secretKey: z.string().startsWith("sk_"),
+  webhookSecret: z.string().min(1).optional(),
+});
+export function authEnabled() {
+  return Boolean(
+    process.env.CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY,
+  );
+}
+export function getAuthConfig() {
+  const result = clerkSchema.safeParse({
+    publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+    secretKey: process.env.CLERK_SECRET_KEY,
+    webhookSecret: process.env.CLERK_WEBHOOK_SECRET,
+  });
+  if (!result.success)
+    throw new Error(
+      "Configure CLERK_PUBLISHABLE_KEY and CLERK_SECRET_KEY for authentication",
+    );
+  return result.data;
+}
+export function publicAuthKey() {
+  return authEnabled() ? getAuthConfig().publishableKey : null;
+}
+export function localRenderConfig() {
+  return {
+    appUrl: z.url().parse(process.env.APP_BASE_URL ?? "http://localhost:3000"),
+    root: process.env.LOCAL_MEDIA_DIR ?? "./.media",
+  };
+}

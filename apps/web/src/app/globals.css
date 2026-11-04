@@ -1,15 +1,10 @@
 @import "tailwindcss";
-:root {
-  --paper: #efe3cc;
-  --ink: #2a1d17;
-  --accent: #5e1f26;
-}
 @theme inline {
   --color-paper: var(--paper);
   --color-ink: var(--ink);
   --color-accent: var(--accent);
-  --font-display: "Fraunces", Georgia, serif;
-  --font-body: "Figtree", Arial, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-body: var(--font-figtree), Arial, sans-serif;
 }
 body {
   background: var(--paper);

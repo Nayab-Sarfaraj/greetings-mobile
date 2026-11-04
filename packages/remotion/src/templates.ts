@@ -35,8 +35,8 @@ export const templates: Template[] = [
     scenes: [
       { id: "intro", seconds: 6 },
       { id: "details", seconds: 9 },
-      { id: "guest-name", seconds: 5 },
       { id: "closing", seconds: 5 },
+      { id: "guest-name", seconds: 5 },
     ],
     defaultProps: {
       type: "invitation",

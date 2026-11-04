@@ -17,6 +17,13 @@ describe("template contract", () => {
         ).success,
       ).toBe(true);
   });
+  it("shows the guest name in the final scene", () => {
+    expect(
+      templates
+        .find((template) => template.type === "invitation")
+        ?.scenes.at(-1)?.id,
+    ).toBe("guest-name");
+  });
   it("rejects long messages", () => {
     const card = templates[0].defaultProps;
     expect(

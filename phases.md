@@ -104,7 +104,7 @@ These are defaults used in the phases below. Flag them to the owner at the start
 - **Player:** `@remotion/player` in a lazy-loaded client component. Looping, muted autoplay with tap-to-unmute, play/pause, restart. Memoized `inputProps`, edits debounced about 250 ms.
 - **Draft persistence:** text fields saved to `localStorage` so a refresh keeps them. The photo is kept in memory only.
 - Responsive layout: Player above the form on phones, side by side on desktop.
-- **Lambda cost test (final task):** deploy the Remotion Lambda function and site. Render each Thanksgiving template with realistic props. Test two or three memory sizes and `framesPerLambda` values. Record render time and cost per template in `docs/cost-benchmarks.md`.
+- **Local render test (final task):** render each Thanksgiving template as an MP4 and review key and stress-case frames at phone size. Record local render time in `docs/cost-benchmarks.md`. Defer Lambda cost testing until AWS is configured for the render pipeline in Phase 4.
 
 **Rules and edge cases**
 
@@ -115,7 +115,7 @@ These are defaults used in the phases below. Flag them to the owner at the start
 
 - A visitor can go from the picker to a live preview on a 360 px-wide screen.
 - Every field's limits match the schema. Invalid input shows a helpful message and never crashes the Player.
-- `docs/cost-benchmarks.md` contains real numbers, and the owner has used them to set free limits and pack prices.
+- `docs/cost-benchmarks.md` contains measured local render times. Lambda costs, free limits, and pack prices are decided during Phase 4 and Phase 6.
 
 ---
 
@@ -149,6 +149,8 @@ These are defaults used in the phases below. Flag them to the owner at the start
 
 ## Phase 4 — Render pipeline
 
+Development uses a local file-storage adapter and MongoDB-backed Remotion worker so the export pipeline can be built and tested without AWS. The cloud tasks below remain pending for deployment; local implementation and QA are documented in `docs/stage-4.md`.
+
 **Goal:** a signed-in user can export a real MP4 and poster, safely and cheaply.
 
 **Build**
@@ -169,6 +171,7 @@ These are defaults used in the phases below. Flag them to the owner at the start
 - **Rate limits:** per user and per IP on render requests. Numbers come from the Phase 2 cost test.
 - **Cost logging:** store estimated or actual cost on each render row.
 - **Infrastructure tasks:** AWS budget alarm, request a Lambda concurrency limit increase, set Lambda memory and `framesPerLambda` from the benchmark.
+- **Lambda cost test:** deploy the function and site, render each Thanksgiving template at two or three memory and `framesPerLambda` settings, and record actual times and estimated costs in `docs/cost-benchmarks.md` before setting free limits and pack prices.
 
 **Rules and edge cases**
 

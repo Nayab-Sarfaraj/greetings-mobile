@@ -9,7 +9,8 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { palettes, typography, FPS } from "@greetings/shared";
+import { palettes, FPS } from "@greetings/shared";
+import { fonts } from "./fonts";
 import type { VideoProps } from "./schema";
 import { getTemplate } from "./templates";
 const color = palettes.thanksgiving;
@@ -151,10 +152,13 @@ export function Wreath() {
 function FitText({
   children,
   size = 100,
+  script = false,
 }: {
   children: string;
   size?: number;
+  script?: boolean;
 }) {
+  const frame = useCurrentFrame();
   const length = children.length;
   const fontSize = Math.max(
     size * 0.56,
@@ -168,6 +172,14 @@ function FitText({
         overflowWrap: "anywhere",
         lineHeight: 1.12,
         textAlign: "center",
+        fontFamily: script ? fonts.script : fonts.display,
+        display: "-webkit-box",
+        WebkitBoxOrient: "vertical",
+        WebkitLineClamp: 5,
+        overflow: "hidden",
+        clipPath: script
+          ? `inset(0 ${100 - Math.min(100, Math.max(0, frame - 8) * 2)}% 0 0)`
+          : undefined,
       }}
     >
       {children}
@@ -181,11 +193,20 @@ function Scene({ props, id }: { props: VideoProps; id: string }) {
   });
   const isCard = props.type === "card";
   const title = isCard ? "With gratitude" : props.eventTitle;
+  const localEventDate = !isCard
+    ? new Date(`${props.dateTime.slice(0, 10)}T00:00:00Z`).toLocaleDateString(
+        "en-US",
+        { dateStyle: "long", timeZone: "UTC" },
+      )
+    : "";
+  const localEventTime = !isCard
+    ? `${props.dateTime.slice(11, 16)} UTC${props.dateTime.endsWith("Z") ? "+00:00" : props.dateTime.slice(-6)}`
+    : "";
   const subtitle =
     id === "intro"
       ? title
       : id === "details" && !isCard
-        ? `${new Date(props.dateTime).toLocaleString("en-US", { dateStyle: "long", timeStyle: "short", timeZone: "UTC" })}\n${props.locationText}`
+        ? `${localEventDate} at ${localEventTime}\n${props.locationText}`
         : id === "guest-name" && !isCard
           ? (props.guestName ?? props.hostName)
           : isCard
@@ -198,7 +219,7 @@ function Scene({ props, id }: { props: VideoProps; id: string }) {
         color: color.ink,
         alignItems: "center",
         justifyContent: "center",
-        fontFamily: typography.display,
+        fontFamily: fonts.display,
         padding: "260px 100px",
         textAlign: "center",
       }}
@@ -216,7 +237,7 @@ function Scene({ props, id }: { props: VideoProps; id: string }) {
       >
         <div
           style={{
-            fontFamily: typography.body,
+            fontFamily: fonts.body,
             fontSize: 36,
             letterSpacing: 6,
             textTransform: "uppercase",
@@ -225,30 +246,47 @@ function Scene({ props, id }: { props: VideoProps; id: string }) {
         >
           Thanksgiving
         </div>
-        <FitText size={id === "intro" ? 110 : 88}>{subtitle}</FitText>
+        {isCard && id === "closing" && props.recipientName && (
+          <div style={{ fontFamily: fonts.body, fontSize: 36 }}>
+            For {props.recipientName}
+          </div>
+        )}
+        <FitText size={id === "intro" ? 110 : 88} script={id === "guest-name"}>
+          {subtitle}
+        </FitText>
         {id === "closing" && (
-          <div style={{ fontFamily: typography.body, fontSize: 38 }}>
+          <div
+            style={{
+              fontFamily: fonts.body,
+              fontSize: 38,
+              maxWidth: 880,
+              overflowWrap: "anywhere",
+            }}
+          >
             {isCard
               ? `From ${props.senderName}`
               : `Hosted by ${props.hostName}`}
           </div>
         )}
-        {props.photoUrl && id === "details" && (
-          <Img
-            src={props.photoUrl}
-            style={{
-              width: 500,
-              height: 450,
-              objectFit: "cover",
-              border: `12px solid ${color.oxblood}`,
-            }}
-          />
-        )}
+        {props.photoUrl &&
+          (id === "details" || (isCard && id === "closing")) && (
+            <Img
+              src={props.photoUrl}
+              style={{
+                width: 500,
+                height: 450,
+                objectFit: "cover",
+                border: `12px solid ${color.oxblood}`,
+              }}
+            />
+          )}
       </div>
     </AbsoluteFill>
   );
 }
-export function GreetingComposition(props: VideoProps) {
+export function GreetingComposition(
+  props: VideoProps & { watermark?: boolean },
+) {
   const template = getTemplate(
     props.type === "card" ? "harvest-card" : "harvest-invitation",
   );
@@ -266,6 +304,20 @@ export function GreetingComposition(props: VideoProps) {
           </Sequence>
         );
       })}
+      {props.watermark && (
+        <AbsoluteFill
+          style={{
+            justifyContent: "flex-end",
+            alignItems: "center",
+            paddingBottom: 85,
+            color: color.oxblood,
+            fontFamily: fonts.body,
+            fontSize: 32,
+          }}
+        >
+          Made with Seasonal Cards
+        </AbsoluteFill>
+      )}
     </>
   );
 }
