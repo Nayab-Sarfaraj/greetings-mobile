@@ -1,8 +1,24 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPage } from "@/components/legal/legal-page";
 import { legalConfig } from "@/server/lib/config";
+import { siteConfig } from "@/lib/site-config";
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Privacy · CherryQube" };
+
+export const metadata: Metadata = {
+  title: "Privacy · CherryQube",
+  description:
+    "Privacy notice detailing data collection, account storage, guest token security, and Anthropic AI usage disclosures.",
+  alternates: {
+    types: {
+      "text/markdown": `${siteConfig.getBaseUrl()}/privacy.md`,
+    },
+  },
+  other: {
+    "ai-summary":
+      "CherryQube privacy notice explaining how personal photos, event data, guest invitation tokens, and LLM message prompts are handled with zero prompt logging.",
+  },
+};
 export default function Privacy() {
   const { sellerName, supportEmail } = legalConfig();
   return (

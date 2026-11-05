@@ -1,8 +1,24 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPage } from "@/components/legal/legal-page";
 import { legalConfig } from "@/server/lib/config";
+import { siteConfig } from "@/lib/site-config";
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Support · CherryQube" };
+
+export const metadata: Metadata = {
+  title: "Support · CherryQube",
+  description:
+    "Customer support, payment recovery, export troubleshooting, and account removal guidance.",
+  alternates: {
+    types: {
+      "text/markdown": `${siteConfig.getBaseUrl()}/support.md`,
+    },
+  },
+  other: {
+    "ai-summary":
+      "CherryQube help and support directory including contact emails (support@cherryqube.com) and solutions for missing credits or failed renders.",
+  },
+};
 export default function Support() {
   const { supportEmail, sellerName } = legalConfig();
   return (

@@ -7,7 +7,8 @@
     ".": "./src/index.ts",
     "./templates": "./src/templates.ts",
     "./schema": "./src/schema.ts",
-    "./composition": "./src/composition.tsx"
+    "./composition": "./src/composition.tsx",
+    "./themes": "./src/themes.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

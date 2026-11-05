@@ -1,6 +1,21 @@
+import type { Metadata } from "next";
 import { templates } from "@greetings/remotion/templates";
 import { TemplatePicker } from "@/features/template-picker";
 import { EmbedMarker } from "@/components/embed-marker";
+import { siteConfig } from "@/lib/site-config";
+
+export const metadata: Metadata = {
+  title: "CherryQube — Animated Holiday Greetings & Video Invitations",
+  description: siteConfig.description,
+  alternates: {
+    types: {
+      "text/markdown": `${siteConfig.getBaseUrl()}/index.md`,
+    },
+  },
+  other: {
+    "ai-summary": siteConfig.aiSummary,
+  },
+};
 
 export default async function Home({
   searchParams,

@@ -8,6 +8,9 @@ export function LegalFooter() {
       <Link href="/terms">Terms</Link>
       <Link href="/privacy">Privacy</Link>
       <Link href="/support">Support</Link>
+      <Link href="/llms.txt" className="text-ink/60">
+        llms.txt
+      </Link>
     </footer>
   );
 }

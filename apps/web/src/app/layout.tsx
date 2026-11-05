@@ -5,15 +5,60 @@ import "./globals.css";
 import { LegalFooter } from "@/components/legal/footer";
 import { Providers } from "@/components/providers";
 import { publicAuthKey } from "@/server/lib/config";
+import { siteConfig } from "@/lib/site-config";
 const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces" });
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-figtree" });
+
 export const metadata: Metadata = {
   title: "CherryQube",
-  description: "Create animated greetings and invitations",
+  description: siteConfig.description,
+  alternates: {
+    types: {
+      "text/markdown": `${siteConfig.getBaseUrl()}/index.md`,
+    },
+  },
+  other: {
+    "ai-summary": siteConfig.aiSummary,
+  },
 };
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const baseUrl = siteConfig.getBaseUrl();
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${baseUrl}/#organization`,
+        name: siteConfig.name,
+        url: baseUrl,
+        description: siteConfig.description,
+        contactPoint: [
+          {
+            "@type": "ContactPoint",
+            contactType: "customer support",
+            email: siteConfig.contacts.support,
+          },
+          {
+            "@type": "ContactPoint",
+            contactType: "general inquiries",
+            email: siteConfig.contacts.general,
+          },
+        ],
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${baseUrl}/#website`,
+        url: baseUrl,
+        name: siteConfig.name,
+        description: siteConfig.description,
+        publisher: { "@id": `${baseUrl}/#organization` },
+      },
+    ],
+  };
+
   return (
     <html
       lang="en"
@@ -26,6 +71,17 @@ export default function RootLayout({
         } as React.CSSProperties
       }
     >
+      <head>
+        <link
+          rel="alternate"
+          type="text/markdown"
+          href={`${baseUrl}/index.md`}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body>
         <Providers publishableKey={publicAuthKey()}>
           {children}

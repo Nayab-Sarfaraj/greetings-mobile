@@ -1,8 +1,24 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPage } from "@/components/legal/legal-page";
 import { legalConfig } from "@/server/lib/config";
+import { siteConfig } from "@/lib/site-config";
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Terms · CherryQube" };
+
+export const metadata: Metadata = {
+  title: "Terms · CherryQube",
+  description:
+    "Terms and conditions, acceptable use, export credit packs, and merchant of record.",
+  alternates: {
+    types: {
+      "text/markdown": `${siteConfig.getBaseUrl()}/terms.md`,
+    },
+  },
+  other: {
+    "ai-summary":
+      "CherryQube terms of service covering video creation, message suggestion disclaimers, one-time export credit packs via Polar, and acceptable use policies.",
+  },
+};
 export default function Terms() {
   const { sellerName, supportEmail } = legalConfig();
   return (
