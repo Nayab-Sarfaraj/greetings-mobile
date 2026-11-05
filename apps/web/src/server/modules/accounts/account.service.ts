@@ -1,9 +1,11 @@
+import { entitlementRepository } from "../entitlements/entitlement.repository";
 import { rm } from "node:fs/promises";
 import path from "node:path";
 import { localRenderConfig } from "../../lib/config";
 import { ownerPrefix } from "../../integrations/local-storage.client";
 import { accountRepository } from "./account.repository";
 export async function purgeAccount(owner: string) {
+  await entitlementRepository.detach(owner);
   const hashes = await accountRepository.remove(owner);
   const root = path.resolve(localRenderConfig().root);
   await rm(path.join(root, "photos", ownerPrefix(owner)), {

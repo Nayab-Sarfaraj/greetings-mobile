@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Figtree } from "next/font/google";
 import { palettes } from "@greetings/shared";
 import "./globals.css";
+import { LegalFooter } from "@/components/legal/footer";
 import { Providers } from "@/components/providers";
 import { publicAuthKey } from "@/server/lib/config";
 const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces" });
@@ -26,7 +27,10 @@ export default function RootLayout({
       }
     >
       <body>
-        <Providers publishableKey={publicAuthKey()}>{children}</Providers>
+        <Providers publishableKey={publicAuthKey()}>
+          {children}
+          <LegalFooter />
+        </Providers>
       </body>
     </html>
   );

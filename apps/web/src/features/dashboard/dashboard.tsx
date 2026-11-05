@@ -6,6 +6,7 @@ import Link from "next/link";
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { useAuthEnabled } from "@/components/providers";
 import { useDeleteInvitation, useInvitations } from "../editor/use-invitations";
+import { GuestManager } from "../guests/guest-manager";
 function AuthenticatedDashboard() {
   const { isLoaded, isSignedIn } = useUser();
   const query = useInvitations(Boolean(isSignedIn));
@@ -93,6 +94,9 @@ function AuthenticatedDashboard() {
             >
               Delete
             </button>
+            {item.props.type === "invitation" && (
+              <GuestManager invitationId={item.id} />
+            )}
           </li>
         ))}
       </ul>

@@ -1,3 +1,10 @@
+import { paymentSettings } from "../../lib/config";
+import {
+  paidRenderRepository,
+  RenderRetryLimit,
+} from "./paid-render.repository";
+import { InsufficientBalance } from "../entitlements/entitlement.repository";
+import type { RenderTier } from "./render.model";
 import { bindResult, publishResults } from "../results/publication.service";
 import { validate } from "../../lib/validation";
 import { createHash } from "node:crypto";
@@ -9,6 +16,7 @@ import {
   NotFoundError,
   ValidationError,
   RateLimitError,
+  PaymentRequiredError,
 } from "../../lib/errors";
 import { rateLimit } from "../../lib/rate-limit";
 export function canonical(value: unknown): string {
@@ -27,10 +35,17 @@ const defaultDependencies = {
   limit: rateLimit,
   checkPhoto: assertOwnedPhoto,
   bindResult,
+  reserveHd: paidRenderRepository.reserve,
+  environment: () => paymentSettings().environment,
 };
 export function createRenderService(deps: typeof defaultDependencies) {
   return {
-    async request(owner: string, id: string, ip?: string) {
+    async request(
+      owner: string,
+      id: string,
+      ip?: string,
+      quality: RenderTier = "free",
+    ) {
       const item = await deps.invitations.get(owner, id);
       const input = validate(invitationInput, {
         templateId: item.templateId,
@@ -44,13 +59,18 @@ export function createRenderService(deps: typeof defaultDependencies) {
           throw new ValidationError("Photo does not belong to your account");
         }
       }
+      const environment = quality === "hd" ? deps.environment() : undefined;
       const propsHash = createHash("sha256")
         .update(
           canonical({
             owner,
+            billingEnvironment: environment,
             templateId: input.templateId,
             props: input.props,
-            tier: "free-720p-watermarked-v1",
+            tier:
+              quality === "hd"
+                ? "hd-1080p-clean-v1"
+                : "free-720p-watermarked-v1",
           }),
         )
         .digest("hex");
@@ -66,6 +86,29 @@ export function createRenderService(deps: typeof defaultDependencies) {
           `render-ip:${createHash("sha256").update(ip).digest("hex")}`,
           30,
         );
+      if (quality === "hd") {
+        try {
+          const job = await deps.reserveHd(
+            owner,
+            id,
+            propsHash,
+            input,
+            environment!,
+          );
+          if (job) await deps.bindResult(owner, id, job);
+          return job;
+        } catch (error) {
+          if (error instanceof InsufficientBalance)
+            throw new PaymentRequiredError(
+              "Choose an export pack to make this HD video",
+            );
+          if (error instanceof RenderRetryLimit)
+            throw new RateLimitError(
+              "This video has reached its retry limit. Change the content before exporting again.",
+            );
+          throw error;
+        }
+      }
       if (cached) {
         const retried = await deps.renders.retry(owner, propsHash);
         if (!retried) {

@@ -1,3 +1,4 @@
+import { paidRenderRepository } from "./paid-render.repository";
 import { randomUUID } from "node:crypto";
 import { connectDb } from "../../lib/db";
 import { Render } from "./render.model";
@@ -30,6 +31,7 @@ export const renderRepository = {
             propsHash,
             input: JSON.parse(JSON.stringify(input)),
             status: "queued",
+            tier: "free",
             attempts: 0,
           },
         },
@@ -84,6 +86,8 @@ export const renderRepository = {
     );
   },
   async fail(id: string, attemptId: string) {
+    const job = await Render.findById(id).select("tier").lean();
+    if (job?.tier === "hd") return paidRenderRepository.fail(id, attemptId);
     return Render.updateOne(
       { _id: id, attemptId, status: "rendering" },
       {
@@ -97,16 +101,24 @@ export const renderRepository = {
   async retry(ownerClerkId: string, propsHash: string) {
     await connectDb();
     return Render.findOneAndUpdate(
-      { ownerClerkId, propsHash, status: "failed", attempts: { $lt: 3 } },
+      {
+        ownerClerkId,
+        propsHash,
+        tier: { $ne: "hd" },
+        status: "failed",
+        attempts: { $lt: 3 },
+      },
       { $set: { status: "queued" }, $unset: { error: 1, startedAt: 1 } },
       { returnDocument: "after" },
     ).lean();
   },
   async sweep() {
     await connectDb();
+    await paidRenderRepository.sweep();
     const cutoff = new Date(Date.now() - 600000);
     return Render.updateMany(
       {
+        tier: { $ne: "hd" },
         $or: [
           { status: "rendering", startedAt: { $lt: cutoff } },
           { status: "queued", updatedAt: { $lt: cutoff } },

@@ -126,6 +126,9 @@ importers:
       '@next/env':
         specifier: 16.4.4
         version: 16.4.4
+      '@polar-sh/sdk':
+        specifier: ^1.0.2
+        version: 1.0.2
       '@remotion/bundler':
         specifier: 4.0.540
         version: 4.0.540(@swc/helpers@0.5.23)(lightningcss@1.33.0)(postcss@8.5.32)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -1640,6 +1643,10 @@ packages:
 
   '@oxc-project/types@0.154.0':
     resolution: {integrity: sha512-KYOUGQFlLWR+s4QMV2Q9ko38TZm7EdO87Qm7rvZLqk/webse/cDjtyxKhg/47l0byCbs/k46LT8qc4PKjAikzA==}
+
+  '@polar-sh/sdk@1.0.2':
+    resolution: {integrity: sha512-c3jdqYloVfcejKsAqYfYcW4bG7KkXj5bXkgdsdx4GHlJPzHFV5tysfeZGf9V7dJReLBirAluchsuHWiAIBco8w==}
+    engines: {node: '>=22'}
 
   '@radix-ui/primitive@1.2.0':
     resolution: {integrity: sha512-KABY+VMIRPJL+Vyzv/335FEhXXD/xDv8BMb1kl48/aXJZMH0LtHCTx5ga5RnxaEP3nZHtmTLf1P9vanmFX46bw==}
@@ -7489,6 +7496,8 @@ snapshots:
     optional: true
 
   '@oxc-project/types@0.154.0': {}
+
+  '@polar-sh/sdk@1.0.2': {}
 
   '@radix-ui/primitive@1.2.0': {}
 

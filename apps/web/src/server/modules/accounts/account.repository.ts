@@ -24,6 +24,7 @@ export const accountRepository = {
     await db.collection("renders").deleteMany({ ownerClerkId: clerkId });
     await db.collection("guests").deleteMany({ invitationId: { $in: ids } });
     await db.collection("invitations").deleteMany({ ownerClerkId: clerkId });
+    await db.collection("message_usage").deleteMany({ ownerClerkId: clerkId });
     await db
       .collection("entitlements")
       .updateMany(

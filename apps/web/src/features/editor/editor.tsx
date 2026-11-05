@@ -8,7 +8,9 @@ import {
   invitationSchema,
   type VideoProps,
 } from "@greetings/remotion";
+import { MESSAGE_MAX_CHARS } from "@greetings/shared";
 import { SaveControls } from "./save-controls";
+import { MessageWriter } from "../messages/message-writer";
 import type { SavedInvitation } from "./use-invitations";
 const Preview = dynamic(() => import("./preview"), {
   ssr: false,
@@ -35,7 +37,7 @@ const labels: Record<string, string> = {
 const limits: Record<string, number> = {
   senderName: 40,
   recipientName: 40,
-  message: 240,
+  message: MESSAGE_MAX_CHARS,
   eventTitle: 70,
   hostName: 40,
   locationText: 120,
@@ -254,6 +256,28 @@ export default function Editor({
                 )}
                 {errors[key] && (
                   <p className="mt-1 text-sm text-red-800">{errors[key]}</p>
+                )}
+                {key === "message" && (
+                  <MessageWriter
+                    context={
+                      fields.type === "card"
+                        ? {
+                            type: "card",
+                            themeId: "thanksgiving",
+                            senderName: fields.senderName,
+                            recipientName: fields.recipientName,
+                          }
+                        : {
+                            type: "invitation",
+                            themeId: "thanksgiving",
+                            eventTitle: fields.eventTitle,
+                            hostName: fields.hostName,
+                            dateTime: fields.dateTime,
+                            locationText: fields.locationText,
+                          }
+                    }
+                    onSelect={(message) => update("message", message)}
+                  />
                 )}
                 {key === "dateTime" && (
                   <p className="mt-1 text-sm">

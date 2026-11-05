@@ -18,7 +18,7 @@ export async function processNextRender(
   const poster = `renders/${job.propsHash}/${attempt}.png`;
   try {
     const input = invitationInput.parse(job.input);
-    await renderer.render(input, video, poster);
+    await renderer.render(input, video, poster, job.tier ?? "free");
     const result = await renderRepository.complete(
       id,
       attempt,

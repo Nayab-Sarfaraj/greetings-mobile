@@ -4,7 +4,7 @@ pnpm workspace for the web editor, Remotion compositions, shared types, and the 
 
 ## Local development
 
-1. Start Docker Desktop and run `docker compose up -d` for MongoDB.
+1. Start Docker Desktop and run `docker compose up -d --wait` for MongoDB.
 2. Copy `.env.example` to `apps/web/.env.local`.
 3. Run `pnpm install`, then `pnpm --filter @greetings/web dev`.
 4. Visit `http://localhost:3000/api/health` to check the app and database.
@@ -38,3 +38,17 @@ MONGODB_URI=mongodb://127.0.0.1:27017/greetings_stage4_test LOCAL_MEDIA_DIR=./.m
 ## Public result pages
 
 After an export finishes, choose **Open shareable result** in the editor, or **Open result page** in the dashboard. Recipients can watch, download, share, or make their own creation without signing in. Set `APP_BASE_URL` to the deployed HTTPS origin before testing link previews in messaging apps. Details and QA coverage are in `docs/stage-5.md`.
+
+## Paid HD exports
+
+Stage 6 adds Polar one-time packs, a transactional credit ledger, and HD exports without a watermark. Configure the Polar sandbox products/keys and real seller/support details listed in `.env.example`; the setup and verification notes are in `docs/stage-6.md`. Prices are fetched from Polar. A purchase redirect alone never adds credits.
+
+Start MongoDB with `docker compose up -d --wait` so the replica set is healthy, then run the web app and render worker. The worker renders free jobs at 720p with a watermark and funded HD jobs at 1080p without one, and refunds failed paid jobs automatically. Keep the worker running for scheduled creation and upload cleanup.
+
+## AI message writer
+
+Signed-in users can choose **Write it for me** below the message field, select a tone and US or UK spelling, and pick from three editable suggestions. Add `ANTHROPIC_API_KEY` to `apps/web/.env.local` to use Anthropic. Without a key—or if the provider times out—the same flow returns curated suggestions and explains the fallback. Configuration, safeguards, and verification are documented in `docs/stage-7.md`.
+
+## Personalized guest links
+
+Invitation creators can add guests or paste/upload a CSV from the dashboard. Each guest receives a stable `/i/[token]` link that plays the invitation live with their name and offers email, WhatsApp, or SMS RSVP actions. The app does not record RSVP responses. CSV format, privacy boundaries, and the isolated 20-guest verification are documented in `docs/stage-8.md`.

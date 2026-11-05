@@ -48,3 +48,61 @@ export function localRenderConfig() {
     root: process.env.LOCAL_MEDIA_DIR ?? "./.media",
   };
 }
+
+const packSchema = z.object({
+  id: z.string().regex(/^[a-z0-9-]{1,40}$/),
+  productId: z.uuid(),
+  credits: z.number().int().min(1).max(1000),
+});
+export function legalConfig() {
+  return {
+    sellerName: process.env.BILLING_SELLER_NAME?.trim() || null,
+    supportEmail: process.env.SUPPORT_EMAIL
+      ? z.email().parse(process.env.SUPPORT_EMAIL)
+      : null,
+  };
+}
+export function paymentSettings() {
+  let raw: unknown = [];
+  try {
+    raw = JSON.parse(process.env.POLAR_PACKS || "[]");
+  } catch {
+    throw new Error("Invalid configuration: POLAR_PACKS");
+  }
+  const packs = z.array(packSchema).max(10).parse(raw);
+  if (
+    new Set(packs.map((pack) => pack.id)).size !== packs.length ||
+    new Set(packs.map((pack) => pack.productId)).size !== packs.length
+  )
+    throw new Error("Invalid configuration: duplicate POLAR_PACKS");
+  return {
+    packs,
+    environment: z
+      .enum(["sandbox", "production"])
+      .parse(process.env.POLAR_ENVIRONMENT ?? "sandbox"),
+    accessToken: process.env.POLAR_ACCESS_TOKEN || null,
+    webhookSecret: process.env.POLAR_WEBHOOK_SECRET || null,
+  };
+}
+export function checkoutEnabled() {
+  const settings = paymentSettings();
+  const legal = legalConfig();
+  return Boolean(
+    settings.accessToken &&
+    settings.webhookSecret &&
+    settings.packs.length &&
+    legal.sellerName &&
+    legal.supportEmail,
+  );
+}
+
+const anthropicModel = z.string().regex(/^[a-zA-Z0-9._-]{1,100}$/);
+export function llmSettings() {
+  return {
+    apiKey: process.env.ANTHROPIC_API_KEY?.trim() || null,
+    model: anthropicModel.parse(
+      process.env.ANTHROPIC_MODEL ?? "claude-haiku-5-5",
+    ),
+    timeoutMs: 15000,
+  };
+}

@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { createRenderService, canonical } from "./render.service";
 import { NotFoundError } from "../../lib/errors";
+import { InsufficientBalance } from "../entitlements/entitlement.repository";
+import { renderChoice } from "./render.schema";
 import { templates } from "@greetings/remotion/templates";
 function setup() {
   const invitations = {
@@ -19,7 +21,15 @@ function setup() {
   };
   const limit = vi.fn();
   const checkPhoto = vi.fn();
-  const deps = { invitations, renders, limit, checkPhoto, bindResult: vi.fn() };
+  const deps = {
+    invitations,
+    renders,
+    limit,
+    checkPhoto,
+    bindResult: vi.fn(),
+    reserveHd: vi.fn(),
+    environment: () => "sandbox" as const,
+  };
   return {
     ...deps,
     service: createRenderService(
@@ -28,6 +38,19 @@ function setup() {
   };
 }
 describe("render safeguards", () => {
+  it("ignores client paid and watermark flags", () => {
+    expect(renderChoice.parse({ paid: true, watermark: false })).toEqual({
+      quality: "free",
+    });
+  });
+  it("requires a credit reservation for a new HD render", async () => {
+    const t = setup();
+    t.reserveHd.mockRejectedValue(new InsufficientBalance());
+    await expect(
+      t.service.request("owner", "id", undefined, "hd"),
+    ).rejects.toMatchObject({ status: 402 });
+    expect(t.renders.enqueue).not.toHaveBeenCalled();
+  });
   it("canonicalizes object key order", () => {
     expect(canonical({ b: 1, a: { d: 2, c: 3 } })).toBe(
       canonical({ a: { c: 3, d: 2 }, b: 1 }),

@@ -8,6 +8,7 @@ const schema = new Schema(
     templateId: { type: String, required: true },
     props: { type: Schema.Types.Mixed, required: true },
     hostContact: Schema.Types.Mixed,
+    guestCount: { type: Number, default: 0, min: 0 },
     status: { type: String, default: "draft" },
   },
   { timestamps: true },

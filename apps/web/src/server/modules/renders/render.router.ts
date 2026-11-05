@@ -1,3 +1,6 @@
+import { renderChoice } from "./render.schema";
+import { validate } from "../../lib/validation";
+import { ValidationError } from "../../lib/errors";
 import { requireUser } from "../../middleware/auth";
 import { errorResponse } from "../../lib/errors";
 import { getRender, requestRender } from "./render.service";
@@ -7,10 +10,20 @@ export async function create(
   context: { params: Promise<{ id: string }> },
 ) {
   try {
+    const owner = await requireUser();
+    const body = await request.text();
+    let raw: unknown;
+    try {
+      raw = body ? JSON.parse(body) : {};
+    } catch {
+      throw new ValidationError("Invalid export request");
+    }
+    const choice = validate(renderChoice, raw);
     const item = await requestRender(
-      await requireUser(),
+      owner,
       (await context.params).id,
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
+      choice.quality,
     );
     if (!item) throw new Error("Render queue unavailable");
     return Response.json(renderDto(item), { status: 202 });

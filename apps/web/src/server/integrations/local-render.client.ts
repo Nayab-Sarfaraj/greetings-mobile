@@ -7,6 +7,7 @@ import {
 } from "@remotion/renderer";
 import path from "node:path";
 import { mkdir } from "node:fs/promises";
+import type { RenderTier } from "../modules/renders/render.model";
 import type { InvitationInput } from "../modules/invitations/invitation.schema";
 import { mediaPath } from "./local-storage.client";
 export interface RenderClient {
@@ -14,6 +15,7 @@ export interface RenderClient {
     input: InvitationInput,
     videoKey: string,
     posterKey: string,
+    tier?: RenderTier,
   ): Promise<void>;
 }
 export async function createLocalRenderer(): Promise<RenderClient> {
@@ -21,7 +23,7 @@ export async function createLocalRenderer(): Promise<RenderClient> {
     entryPoint: path.resolve("../../packages/remotion/src/root.tsx"),
   });
   return {
-    async render(input, videoKey, posterKey) {
+    async render(input, videoKey, posterKey, tier = "free") {
       const inputProps = {
         // Null survives JSON serialization and clears Studio's example defaults.
         recipientName: null,
@@ -30,7 +32,7 @@ export async function createLocalRenderer(): Promise<RenderClient> {
         mapUrl: null,
         guestName: null,
         ...input.props,
-        watermark: true,
+        watermark: tier !== "hd",
       };
       const composition = await selectComposition({
         serveUrl,
@@ -47,7 +49,7 @@ export async function createLocalRenderer(): Promise<RenderClient> {
           inputProps,
           codec: "h264",
           outputLocation: mediaPath(videoKey),
-          scale: 2 / 3,
+          scale: tier === "hd" ? 1 : 2 / 3,
           concurrency: 2,
           cancelSignal,
         });
@@ -57,7 +59,7 @@ export async function createLocalRenderer(): Promise<RenderClient> {
           inputProps,
           output: mediaPath(posterKey),
           frame: Math.min(120, composition.durationInFrames - 1),
-          scale: 2 / 3,
+          scale: tier === "hd" ? 1 : 2 / 3,
           cancelSignal,
         });
       } finally {

@@ -1,4 +1,8 @@
 "use client";
+import { useEffect, useState } from "react";
+import type { ExportQuality } from "@greetings/shared";
+import { BillingPanel } from "../billing/billing-panel";
+import { ExportQualityOptions } from "../billing/export-quality";
 import { CreatorResultLink } from "../results/creator-result-link";
 import { SignInButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
@@ -13,11 +17,19 @@ type Props = {
 };
 function Controls({ input, photo, initialId, invalid }: Props) {
   const { isLoaded, isSignedIn } = useUser();
-  const { saveDraft, exportVideo, job, busy, savedId } = useExportCreation(
-    input,
-    photo,
-    initialId,
-  );
+  const [quality, setQuality] = useState<ExportQuality>("free");
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (
+        new URLSearchParams(window.location.search).get("checkout") ===
+        "success"
+      )
+        setQuality("hd");
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+  const { saveDraft, exportVideo, job, busy, savedId, prepareDraft } =
+    useExportCreation(input, photo, initialId, quality);
   if (!isLoaded) return <p role="status">Loading account…</p>;
   if (!isSignedIn)
     return (
@@ -32,6 +44,11 @@ function Controls({ input, photo, initialId, invalid }: Props) {
     );
   return (
     <section aria-label="Save and export" className="mt-6 space-y-3">
+      <ExportQualityOptions
+        quality={quality}
+        onChange={setQuality}
+        disabled={busy}
+      />
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
@@ -47,7 +64,11 @@ function Controls({ input, photo, initialId, invalid }: Props) {
           onClick={() => exportVideo.mutate()}
           className="rounded-full bg-accent px-6 py-3 text-white disabled:opacity-50"
         >
-          {exportVideo.isPending ? "Preparing video…" : "Export video"}
+          {exportVideo.isPending
+            ? "Preparing video…"
+            : quality === "hd"
+              ? "Export HD video"
+              : "Export free video"}
         </button>
         <Link href="/dashboard" className="px-4 py-3 underline">
           Your creations
@@ -88,6 +109,7 @@ function Controls({ input, photo, initialId, invalid }: Props) {
           )}
         </div>
       )}
+      <BillingPanel prepareDraft={prepareDraft} disabled={invalid || busy} />
     </section>
   );
 }

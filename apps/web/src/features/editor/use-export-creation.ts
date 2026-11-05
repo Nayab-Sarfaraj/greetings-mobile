@@ -1,6 +1,7 @@
 "use client";
-import { useRef, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useRef, useState, useEffect } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { ExportQuality } from "@greetings/shared";
 import { api } from "@/lib/api-client";
 import { useSaveInvitation, type SaveInput } from "./use-invitations";
 export type RenderJob = {
@@ -8,6 +9,7 @@ export type RenderJob = {
   invitationId: string;
   invitationIds?: string[];
   status: string;
+  tier: ExportQuality;
   fileUrl?: string;
   posterUrl?: string;
   error?: string;
@@ -16,7 +18,9 @@ export function useExportCreation(
   input: SaveInput,
   photo?: string,
   initialId?: string,
+  quality: ExportQuality = "free",
 ) {
+  const client = useQueryClient();
   const [savedId, setSavedId] = useState(initialId);
   const [jobId, setJobId] = useState<string>();
   const photos = useRef(new Map<string, string>());
@@ -57,9 +61,13 @@ export function useExportCreation(
       const item = await saveCurrent();
       return api<RenderJob>(`/api/invitations/${item.id}/renders`, {
         method: "POST",
+        body: JSON.stringify({ quality }),
       });
     },
-    onSuccess: (job) => setJobId(job.id),
+    onSuccess: (job) => {
+      setJobId(job.id);
+      void client.invalidateQueries({ queryKey: ["credits"] });
+    },
   });
   const job = useQuery({
     queryKey: ["render", jobId],
@@ -70,7 +78,12 @@ export function useExportCreation(
         ? false
         : Math.min(30000, 2000 * 2 ** query.state.fetchFailureCount),
   });
+  useEffect(() => {
+    if (job.data?.status === "failed" || job.data?.status === "ready")
+      void client.invalidateQueries({ queryKey: ["credits"] });
+  }, [job.data?.status, job.data?.id, client]);
   return {
+    prepareDraft: saveCurrent,
     saveDraft,
     exportVideo,
     job,

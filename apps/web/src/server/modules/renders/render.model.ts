@@ -1,6 +1,10 @@
 import mongoose, { Schema } from "mongoose";
 import type { InvitationInput } from "../invitations/invitation.schema";
+export type RenderTier = "free" | "hd";
 export interface RenderRecord {
+  tier: RenderTier;
+  billingEnvironment?: "sandbox" | "production";
+  chargeSequence: number;
   ownerClerkId: string;
   invitationId: string;
   invitationIds: string[];
@@ -20,6 +24,9 @@ export interface RenderRecord {
 }
 const schema = new Schema<RenderRecord>(
   {
+    tier: { type: String, enum: ["free", "hd"], default: "free" },
+    chargeSequence: { type: Number, default: 0 },
+    billingEnvironment: { type: String, enum: ["sandbox", "production"] },
     ownerClerkId: { type: String, required: true, index: true },
     invitationId: { type: String, required: true, index: true },
     invitationIds: { type: [String], index: true },
@@ -41,6 +48,8 @@ const schema = new Schema<RenderRecord>(
   },
   { timestamps: true },
 );
+schema.index({ status: 1, startedAt: 1 });
+schema.index({ status: 1, updatedAt: 1 });
 schema.index({ ownerClerkId: 1, propsHash: 1 }, { unique: true });
 export const Render =
   (mongoose.models.Render as mongoose.Model<RenderRecord>) ||

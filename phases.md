@@ -222,6 +222,8 @@ Development uses a local file-storage adapter and MongoDB-backed Remotion worker
 
 ## Phase 6 — Payments and entitlements (Polar, web)
 
+The configurable implementation and local verification are documented in `docs/stage-6.md`. Actual Polar sandbox checkout remains a required external integration check once products, credentials, and seller/support details are supplied. Partial refunds currently revoke credits proportionally, rounded up to whole credits; review this default with the final pack pricing before launch.
+
 **Goal:** users can buy packs, and paid exports are clean and HD.
 
 **Build**
@@ -268,6 +270,10 @@ If Christmas needs to be ready sooner than the later phases, pull its templates 
 
 ## Phase 7 — AI message writer
 
+The server-side Anthropic integration, bounded curated fallback, usage logging,
+and editor UI are documented in `docs/stage-7.md`. A live provider request
+remains an external integration check until an Anthropic API key is configured.
+
 **Goal:** users can generate the greeting text instead of writing it.
 
 **Build**
@@ -290,6 +296,10 @@ If Christmas needs to be ready sooner than the later phases, pull its templates 
 ---
 
 ## Phase 8 — Guests and personalization
+
+The guest-link model, partial CSV review flow, live personalized page, RSVP
+deep links, deletion cascade, and local verification are documented in
+`docs/stage-8.md`.
 
 **Goal:** per-guest links, guest-name-at-the-end, and RSVP by message.
 
