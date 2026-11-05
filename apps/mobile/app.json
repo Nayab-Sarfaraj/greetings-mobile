@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "greetings-mobile",
+    "name": "Seasonal Cards",
     "slug": "greetings-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/greetings-icon.png",
     "scheme": "greetingsmobile",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -13,9 +13,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
+        "backgroundColor": "#FFF8E8",
+        "foregroundImage": "./assets/images/greetings-icon.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
@@ -30,9 +29,16 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "backgroundColor": "#FFF8E8",
+          "image": "./assets/images/greetings-splash.png",
+          "imageWidth": 180
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Seasonal Cards to use a photo in your greeting.",
+          "microphonePermission": false
         }
       ]
     ],

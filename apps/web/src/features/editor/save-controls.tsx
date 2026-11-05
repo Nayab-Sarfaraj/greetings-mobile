@@ -14,8 +14,9 @@ type Props = {
   photo?: string;
   initialId?: string;
   invalid: boolean;
+  embed?: boolean;
 };
-function Controls({ input, photo, initialId, invalid }: Props) {
+function Controls({ input, photo, initialId, invalid, embed }: Props) {
   const { isLoaded, isSignedIn } = useUser();
   const [quality, setQuality] = useState<ExportQuality>("free");
   useEffect(() => {
@@ -109,7 +110,9 @@ function Controls({ input, photo, initialId, invalid }: Props) {
           )}
         </div>
       )}
-      <BillingPanel prepareDraft={prepareDraft} disabled={invalid || busy} />
+      {!embed && (
+        <BillingPanel prepareDraft={prepareDraft} disabled={invalid || busy} />
+      )}
     </section>
   );
 }

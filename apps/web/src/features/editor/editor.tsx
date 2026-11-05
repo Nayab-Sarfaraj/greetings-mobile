@@ -8,10 +8,20 @@ import {
   invitationSchema,
   type VideoProps,
 } from "@greetings/remotion";
-import { MESSAGE_MAX_CHARS } from "@greetings/shared";
+import {
+  MESSAGE_MAX_CHARS,
+  parseNativeToWebBridgeMessage,
+} from "@greetings/shared";
 import { SaveControls } from "./save-controls";
 import { MessageWriter } from "../messages/message-writer";
 import type { SavedInvitation } from "./use-invitations";
+import { EmbedMarker } from "@/components/embed-marker";
+
+declare global {
+  interface Window {
+    ReactNativeWebView?: { postMessage(message: string): void };
+  }
+}
 const Preview = dynamic(() => import("./preview"), {
   ssr: false,
   loading: () => (
@@ -45,9 +55,11 @@ const limits: Record<string, number> = {
 export default function Editor({
   templateId,
   initial,
+  embed = false,
 }: {
   templateId: string;
   initial?: SavedInvitation;
+  embed?: boolean;
 }) {
   const template = getTemplate(templateId)!;
   const [fields, setFields] = useState<VideoProps>(
@@ -109,6 +121,33 @@ export default function Editor({
     }, 250);
     return () => clearTimeout(timer);
   }, [fields, photo, template.type]);
+  useEffect(() => {
+    if (!embed) return;
+    const receive = (event: MessageEvent) => {
+      let value: unknown = event.data;
+      if (typeof value === "string") {
+        try {
+          value = JSON.parse(value);
+        } catch {
+          return;
+        }
+      }
+      const parsed = parseNativeToWebBridgeMessage(value);
+      if (parsed.success && parsed.data.type === "PHOTO_PICKED")
+        setPhoto(parsed.data.url);
+    };
+    window.addEventListener("message", receive);
+    document.addEventListener("message", receive as EventListener);
+    return () => {
+      window.removeEventListener("message", receive);
+      document.removeEventListener("message", receive as EventListener);
+    };
+  }, [embed]);
+  function requestNativePhoto() {
+    window.ReactNativeWebView?.postMessage(
+      JSON.stringify({ type: "PHOTO_PICKED", request: true }),
+    );
+  }
   const errors = useMemo(() => {
     const parsed = (
       template.type === "card" ? cardSchema : invitationSchema
@@ -189,9 +228,12 @@ export default function Editor({
   }
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-      <Link href="/" className="underline underline-offset-4">
-        ← All templates
-      </Link>
+      {embed && <EmbedMarker />}
+      {!embed && (
+        <Link href="/" className="underline underline-offset-4">
+          ← All templates
+        </Link>
+      )}
       <h1 className="mt-6 font-display text-4xl">{template.title}</h1>
       <p className="mt-2">Your changes appear in the preview as you type.</p>
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(280px,400px)_1fr]">
@@ -210,6 +252,7 @@ export default function Editor({
             }}
             photo={photo}
             initialId={initial?.id}
+            embed={embed}
             invalid={
               Object.keys(errors).length > 0 ||
               (template.type === "invitation" && Boolean(contactError))
@@ -292,13 +335,23 @@ export default function Editor({
             <label htmlFor="photo" className="block font-medium">
               Photo (optional)
             </label>
-            <input
-              id="photo"
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={(event) => void choosePhoto(event.target.files?.[0])}
-              className="mt-2 block w-full"
-            />
+            {embed ? (
+              <button
+                type="button"
+                onClick={requestNativePhoto}
+                className="mt-2 rounded-full border px-5 py-3"
+              >
+                Choose photo
+              </button>
+            ) : (
+              <input
+                id="photo"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(event) => void choosePhoto(event.target.files?.[0])}
+                className="mt-2 block w-full"
+              />
+            )}
             <p className="mt-1 text-sm">
               Photo stays on this device during preview.
             </p>

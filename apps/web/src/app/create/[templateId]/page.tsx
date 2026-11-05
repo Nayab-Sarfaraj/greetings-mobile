@@ -9,12 +9,12 @@ export default async function CreatePage({
   searchParams,
 }: {
   params: Promise<{ templateId: string }>;
-  searchParams: Promise<{ draft?: string }>;
+  searchParams: Promise<{ draft?: string; embed?: string }>;
 }) {
   const { templateId } = await params;
   const template = getTemplate(templateId);
   if (!template) notFound();
-  const { draft } = await searchParams;
+  const { draft, embed } = await searchParams;
   const initial = draft
     ? invitationDto(await invitationService.get(await requireUser(), draft))
     : undefined;
@@ -24,6 +24,7 @@ export default async function CreatePage({
       key={draft ?? templateId}
       templateId={templateId}
       initial={initial}
+      embed={embed === "1"}
     />
   );
 }

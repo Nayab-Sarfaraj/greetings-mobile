@@ -1,98 +1,123 @@
-import * as Device from "expo-device";
-import { Platform, StyleSheet } from "react-native";
+import { useAuth, useSSO } from "@clerk/expo";
+import { useCallback, useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { GreetingWebView } from "@/components/greeting-webview";
+import { CLERK_PUBLISHABLE_KEY, WEB_ORIGIN } from "@/lib/mobile-config";
 
-import { AnimatedIcon } from "@/components/animated-icon";
-import { HintRow } from "@/components/hint-row";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { WebBadge } from "@/components/web-badge";
-import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
-
-function getDevMenuHint() {
-  if (Platform.OS === "web") {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === "android" ? "cmd+m (or ctrl+m)" : "cmd+d";
+function SignInScreen() {
+  const { startSSOFlow } = useSSO();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const signIn = useCallback(async () => {
+    setBusy(true);
+    setError("");
+    try {
+      await startSSOFlow({ strategy: "oauth_google" });
+    } catch {
+      setError("Sign-in did not finish. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }, [startSSOFlow]);
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+    <SafeAreaView style={styles.auth}>
+      <Text style={styles.brand}>Seasonal Cards</Text>
+      <Text style={styles.title}>Make a greeting worth keeping.</Text>
+      <Text style={styles.copy}>
+        Sign in securely to save, add a photo, and export your video.
+      </Text>
+      <Pressable
+        accessibilityRole="button"
+        disabled={busy}
+        onPress={() => void signIn()}
+        style={styles.button}
+      >
+        {busy ? (
+          <ActivityIndicator color="#FFF8E8" />
+        ) : (
+          <Text style={styles.buttonText}>Continue with Google</Text>
+        )}
+      </Pressable>
+      {error && (
+        <Text accessibilityRole="alert" style={styles.error}>
+          {error}
+        </Text>
+      )}
+    </SafeAreaView>
   );
+}
+
+function App() {
+  const { isLoaded, isSignedIn } = useAuth();
+  if (!isLoaded)
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color="#7A2430" />
+      </View>
+    );
+  return isSignedIn ? <GreetingWebView /> : <SignInScreen />;
 }
 
 export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === "web" && <WebBadge />}
+  if (!CLERK_PUBLISHABLE_KEY) {
+    return (
+      <SafeAreaView style={styles.auth}>
+        <Text style={styles.brand}>Seasonal Cards</Text>
+        <Text style={styles.title}>Mobile sign-in needs configuration.</Text>
+        <Text style={styles.copy}>
+          Add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY and EXPO_PUBLIC_WEB_ORIGIN to
+          apps/mobile/.env.local. The current editor origin is {WEB_ORIGIN}.
+        </Text>
       </SafeAreaView>
-    </ThemedView>
-  );
+    );
+  }
+  return <App />;
 }
 
 const styles = StyleSheet.create({
-  container: {
+  center: {
     flex: 1,
-    justifyContent: "center",
-    flexDirection: "row",
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: "center",
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "#FFF8E8",
+  },
+  auth: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    justifyContent: "center",
+    padding: 28,
+    backgroundColor: "#FFF8E8",
   },
-  title: {
-    textAlign: "center",
-  },
-  code: {
+  brand: {
+    color: "#7A2430",
+    fontSize: 16,
+    fontWeight: "700",
+    letterSpacing: 1.2,
     textTransform: "uppercase",
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: "stretch",
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  title: {
+    color: "#173E31",
+    fontSize: 38,
+    fontWeight: "700",
+    letterSpacing: -1,
+    marginTop: 12,
   },
+  copy: { color: "#35584A", fontSize: 17, lineHeight: 25, marginTop: 16 },
+  button: {
+    alignItems: "center",
+    backgroundColor: "#7A2430",
+    borderRadius: 999,
+    marginTop: 28,
+    minHeight: 52,
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  buttonText: { color: "#FFF8E8", fontSize: 16, fontWeight: "700" },
+  error: { color: "#9D1F2E", marginTop: 16 },
 });
