@@ -33,6 +33,7 @@ body {
   }
 }
 
+html[data-embed="true"] header,
 html[data-embed="true"] footer {
   display: none;
 }

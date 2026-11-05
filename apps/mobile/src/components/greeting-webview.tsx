@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/expo";
+import { useMobileAuth } from "@/hooks/use-mobile-auth";
 import {
   parseWebToNativeBridgeMessage,
   type NativeToWebBridgeMessage,
@@ -22,7 +22,11 @@ import {
   View,
 } from "react-native";
 import WebView, { type WebViewNavigation } from "react-native-webview";
-import { hostedUrl, WEB_ORIGIN } from "@/lib/mobile-config";
+import {
+  hostedUrl,
+  WEB_ORIGIN,
+  CLERK_PUBLISHABLE_KEY,
+} from "@/lib/mobile-config";
 import { pickAndUploadPhoto } from "@/lib/photo-upload";
 import { shareCreation } from "@/lib/native-share";
 
@@ -36,7 +40,7 @@ function isAllowed(url: string) {
 
 export function GreetingWebView({ path = "/" }: { path?: string }) {
   const webViewRef = useRef<any>(null);
-  const { getToken, isSignedIn } = useAuth();
+  const { getToken, isSignedIn } = useMobileAuth();
   const [canGoBack, setCanGoBack] = useState(false);
   const [error, setError] = useState("");
   const [ticket, setTicket] = useState<string | null>(null);
@@ -93,10 +97,13 @@ export function GreetingWebView({ path = "/" }: { path?: string }) {
     return () => subscription.remove();
   }, [canGoBack]);
 
-  async function handleNavigation(request: WebViewNavigation) {
+  function handleNavigation(request: WebViewNavigation) {
     if (isAllowed(request.url)) return true;
-    if (/^(mailto:|sms:|https:\/\/wa\.me\/)/i.test(request.url))
-      await Linking.openURL(request.url);
+    if (/^(mailto:|sms:|https:\/\/wa\.me\/)/i.test(request.url)) {
+      void Linking.openURL(request.url).catch(() =>
+        setError("This link could not be opened."),
+      );
+    }
     return false;
   }
 
@@ -166,7 +173,7 @@ export function GreetingWebView({ path = "/" }: { path?: string }) {
           </Pressable>
         </View>
       )}
-      {!isSignedIn && (
+      {CLERK_PUBLISHABLE_KEY && !isSignedIn && (
         <View style={styles.signedOut}>
           <Text style={styles.signedOutText}>
             Sign in to save, export, and add photos.
