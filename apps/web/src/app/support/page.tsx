@@ -2,13 +2,13 @@ import Link from "next/link";
 import { LegalPage } from "@/components/legal/legal-page";
 import { legalConfig } from "@/server/lib/config";
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Support · Seasonal Cards" };
+export const metadata = { title: "Support · CherryQube" };
 export default function Support() {
   const { supportEmail, sellerName } = legalConfig();
   return (
     <LegalPage title="How can we help?">
       <section>
-        <h2>Contact {sellerName ?? "Seasonal Cards"}</h2>
+        <h2>Contact {sellerName ?? "CherryQube"}</h2>
         {supportEmail ? (
           <p>
             Email <a href={`mailto:${supportEmail}`}>{supportEmail}</a> for

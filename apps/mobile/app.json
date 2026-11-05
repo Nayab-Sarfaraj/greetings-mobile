@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Seasonal Cards",
+    "name": "CherryQube",
     "slug": "greetings-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -37,7 +37,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Seasonal Cards to use a photo in your greeting.",
+          "photosPermission": "Allow CherryQube to use a photo in your greeting.",
           "microphonePermission": false
         }
       ]

@@ -1,7 +1,7 @@
 import { GuestNotFound } from "@/features/guests/guest-not-found";
 
 export const metadata = {
-  title: "Invitation not found · Seasonal Cards",
+  title: "Invitation not found · CherryQube",
   robots: { index: false, follow: false },
 };
 

@@ -11,7 +11,7 @@ export default async function Home({
   return (
     <main className="mx-auto max-w-5xl px-6 py-16">
       {embed === "1" && <EmbedMarker />}
-      <p className="font-medium text-accent">Seasonal Cards</p>
+      <p className="font-medium text-accent">CherryQube</p>
       <h1 className="mt-4 max-w-3xl font-display text-5xl leading-tight sm:text-7xl">
         Make this season feel personal.
       </h1>

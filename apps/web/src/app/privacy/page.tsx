@@ -2,7 +2,7 @@ import Link from "next/link";
 import { LegalPage } from "@/components/legal/legal-page";
 import { legalConfig } from "@/server/lib/config";
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Privacy · Seasonal Cards" };
+export const metadata = { title: "Privacy · CherryQube" };
 export default function Privacy() {
   const { sellerName, supportEmail } = legalConfig();
   return (
@@ -10,8 +10,8 @@ export default function Privacy() {
       <section>
         <h2>Who handles your information</h2>
         <p>
-          {sellerName ?? "Seasonal Cards"} handles the information needed to
-          create, render, and share your greetings and invitations.{" "}
+          {sellerName ?? "CherryQube"} handles the information needed to create,
+          render, and share your greetings and invitations.{" "}
           {supportEmail ? (
             <>
               Contact <a href={`mailto:${supportEmail}`}>{supportEmail}</a>{" "}

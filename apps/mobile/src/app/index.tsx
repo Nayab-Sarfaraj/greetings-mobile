@@ -28,7 +28,7 @@ function SignInScreen() {
   }, [startSSOFlow]);
   return (
     <SafeAreaView style={styles.auth}>
-      <Text style={styles.brand}>Seasonal Cards</Text>
+      <Text style={styles.brand}>CherryQube</Text>
       <Text style={styles.title}>Make a greeting worth keeping.</Text>
       <Text style={styles.copy}>
         Sign in securely to save, add a photo, and export your video.
@@ -69,7 +69,7 @@ export default function HomeScreen() {
   if (!CLERK_PUBLISHABLE_KEY) {
     return (
       <SafeAreaView style={styles.auth}>
-        <Text style={styles.brand}>Seasonal Cards</Text>
+        <Text style={styles.brand}>CherryQube</Text>
         <Text style={styles.title}>Mobile sign-in needs configuration.</Text>
         <Text style={styles.copy}>
           Add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY and EXPO_PUBLIC_WEB_ORIGIN to

@@ -9,7 +9,7 @@ export function LegalPage({
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
       <Link href="/" className="underline">
-        Seasonal Cards
+        CherryQube
       </Link>
       <h1 className="mt-8 font-display text-5xl">{title}</h1>
       <p className="mt-3 text-sm">Updated 4 November 2026</p>

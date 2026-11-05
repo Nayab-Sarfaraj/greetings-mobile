@@ -1,4 +1,4 @@
-# CLAUDE.md — Seasonal Cards & Video Invitations
+# CLAUDE.md — CherryQube (Seasonal Cards & Video Invitations)
 
 Read this whole file before writing code. It records every product and technical decision made so far. If a request conflicts with this file, say so and ask before deviating. When a decision changes, update this file in the same commit.
 

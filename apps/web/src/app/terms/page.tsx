@@ -2,15 +2,15 @@ import Link from "next/link";
 import { LegalPage } from "@/components/legal/legal-page";
 import { legalConfig } from "@/server/lib/config";
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Terms · Seasonal Cards" };
+export const metadata = { title: "Terms · CherryQube" };
 export default function Terms() {
   const { sellerName, supportEmail } = legalConfig();
   return (
     <LegalPage title="Terms">
       <section>
-        <h2>Using Seasonal Cards</h2>
+        <h2>Using CherryQube</h2>
         <p>
-          Seasonal Cards lets you personalize animated greeting cards and video
+          CherryQube lets you personalize animated greeting cards and video
           invitations.{" "}
           {sellerName
             ? `The service is operated by ${sellerName}.`

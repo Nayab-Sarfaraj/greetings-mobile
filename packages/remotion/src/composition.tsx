@@ -186,7 +186,7 @@ export function GreetingComposition(
             fontSize: 32,
           }}
         >
-          Made with Seasonal Cards
+          Made with CherryQube
         </AbsoluteFill>
       )}
     </>

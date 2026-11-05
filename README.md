@@ -1,4 +1,4 @@
-# Seasonal Cards
+# CherryQube
 
 Animated holiday greetings and video invitations — Thanksgiving, Christmas, and New Year's Eve — built with Next.js, Remotion, and React Native.
 

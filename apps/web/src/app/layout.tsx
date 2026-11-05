@@ -8,7 +8,7 @@ import { publicAuthKey } from "@/server/lib/config";
 const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces" });
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-figtree" });
 export const metadata: Metadata = {
-  title: "Seasonal Cards",
+  title: "CherryQube",
   description: "Create animated greetings and invitations",
 };
 export default function RootLayout({
