@@ -3,12 +3,16 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import type { RenderJob } from "../editor/use-export-creation";
 import Link from "next/link";
-import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
-import { useAuthEnabled } from "@/components/providers";
+import {
+  AppSignInButton,
+  AppUserButton,
+  useAppAuth,
+} from "@/components/auth/app-auth";
 import { useDeleteInvitation, useInvitations } from "../editor/use-invitations";
 import { GuestManager } from "../guests/guest-manager";
+
 function AuthenticatedDashboard() {
-  const { isLoaded, isSignedIn } = useUser();
+  const { isLoaded, isSignedIn } = useAppAuth();
   const query = useInvitations(Boolean(isSignedIn));
   const remove = useDeleteInvitation();
   const renders = useQuery({
@@ -22,18 +26,24 @@ function AuthenticatedDashboard() {
         ? 2000
         : false,
   });
+
   if (!isLoaded) return <p role="status">Loading your account…</p>;
+
   if (!isSignedIn)
     return (
-      <SignInButton mode="modal">
-        <button className="rounded-full border px-5 py-3">
+      <AppSignInButton mode="modal">
+        <button className="rounded-full bg-accent px-5 py-3 font-medium text-white transition hover:opacity-90">
           Sign in to see your creations
         </button>
-      </SignInButton>
+      </AppSignInButton>
     );
+
   return (
     <>
-      <UserButton />
+      <div className="flex items-center justify-between pb-4">
+        <p className="text-sm text-ink/70">Signed in as creator</p>
+        <AppUserButton />
+      </div>
       {query.isPending && <p role="status">Loading your creations…</p>}
       {query.error && <p role="alert">{query.error.message}</p>}
       {query.data?.length === 0 && (
@@ -105,18 +115,13 @@ function AuthenticatedDashboard() {
   );
 }
 export default function Dashboard() {
-  const enabled = useAuthEnabled();
   return (
     <main className="mx-auto max-w-4xl px-6 py-12">
       <Link href="/" className="underline">
         All templates
       </Link>
       <h1 className="my-6 font-display text-4xl">Your creations</h1>
-      {enabled ? (
-        <AuthenticatedDashboard />
-      ) : (
-        <p>Accounts are not available yet. Please try again later.</p>
-      )}
+      <AuthenticatedDashboard />
     </main>
   );
 }

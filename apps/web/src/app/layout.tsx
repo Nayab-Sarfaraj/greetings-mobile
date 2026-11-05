@@ -3,6 +3,7 @@ import { Fraunces, Figtree } from "next/font/google";
 import { palettes } from "@greetings/shared";
 import "./globals.css";
 import { LegalFooter } from "@/components/legal/footer";
+import { Header } from "@/components/navigation/header";
 import { Providers } from "@/components/providers";
 import { publicAuthKey } from "@/server/lib/config";
 import { siteConfig } from "@/lib/site-config";
@@ -72,11 +73,6 @@ export default function RootLayout({
       }
     >
       <head>
-        <link
-          rel="alternate"
-          type="text/markdown"
-          href={`${baseUrl}/index.md`}
-        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -84,6 +80,7 @@ export default function RootLayout({
       </head>
       <body>
         <Providers publishableKey={publicAuthKey()}>
+          <Header />
           {children}
           <LegalFooter />
         </Providers>

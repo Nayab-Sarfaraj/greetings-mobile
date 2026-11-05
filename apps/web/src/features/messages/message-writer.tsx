@@ -1,12 +1,11 @@
 "use client";
-import { SignInButton, useUser } from "@clerk/nextjs";
+import { AppSignInButton, useAppAuth } from "@/components/auth/app-auth";
 import { useState } from "react";
 import type {
   GenerateMessageInput,
   MessageSpelling,
   MessageTone,
 } from "@greetings/shared";
-import { useAuthEnabled } from "@/components/providers";
 import { useMessageWriter } from "./use-message-writer";
 
 type Context = Omit<GenerateMessageInput, "tone" | "spelling" | "relationship">;
@@ -25,7 +24,7 @@ function SignedInWriter({
   context: Context;
   onSelect: (message: string) => void;
 }) {
-  const { isLoaded, isSignedIn } = useUser();
+  const { isLoaded, isSignedIn } = useAppAuth();
   const [open, setOpen] = useState(false);
   const [tone, setTone] = useState<MessageTone>("warm");
   const [spelling, setSpelling] = useState<MessageSpelling>("us");
@@ -34,11 +33,11 @@ function SignedInWriter({
   if (!isLoaded) return <p role="status">Loading message writer…</p>;
   if (!isSignedIn)
     return (
-      <SignInButton mode="modal">
-        <button type="button" className="mt-2 text-sm underline">
+      <AppSignInButton mode="modal">
+        <button type="button" className="mt-2 text-sm underline text-accent">
           Sign in to write it for me
         </button>
-      </SignInButton>
+      </AppSignInButton>
     );
   if (!open)
     return (
@@ -144,9 +143,5 @@ export function MessageWriter(props: {
   context: Context;
   onSelect: (message: string) => void;
 }) {
-  return useAuthEnabled() ? (
-    <SignedInWriter {...props} />
-  ) : (
-    <p className="mt-2 text-sm">Message suggestions are not configured yet.</p>
-  );
+  return <SignedInWriter {...props} />;
 }

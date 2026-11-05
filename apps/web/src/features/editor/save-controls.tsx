@@ -4,11 +4,11 @@ import type { ExportQuality } from "@greetings/shared";
 import { BillingPanel } from "../billing/billing-panel";
 import { ExportQualityOptions } from "../billing/export-quality";
 import { CreatorResultLink } from "../results/creator-result-link";
-import { SignInButton, useUser } from "@clerk/nextjs";
+import { AppSignInButton, useAppAuth } from "@/components/auth/app-auth";
 import Link from "next/link";
-import { useAuthEnabled } from "@/components/providers";
 import type { SaveInput } from "./use-invitations";
 import { useExportCreation } from "./use-export-creation";
+
 type Props = {
   input: SaveInput;
   photo?: string;
@@ -16,9 +16,11 @@ type Props = {
   invalid: boolean;
   embed?: boolean;
 };
+
 function Controls({ input, photo, initialId, invalid, embed }: Props) {
-  const { isLoaded, isSignedIn } = useUser();
+  const { isLoaded, isSignedIn } = useAppAuth();
   const [quality, setQuality] = useState<ExportQuality>("free");
+
   useEffect(() => {
     const timer = setTimeout(() => {
       if (
@@ -29,19 +31,22 @@ function Controls({ input, photo, initialId, invalid, embed }: Props) {
     }, 0);
     return () => clearTimeout(timer);
   }, []);
+
   const { saveDraft, exportVideo, job, busy, savedId, prepareDraft } =
     useExportCreation(input, photo, initialId, quality);
+
   if (!isLoaded) return <p role="status">Loading account…</p>;
+
   if (!isSignedIn)
     return (
-      <SignInButton mode="modal">
+      <AppSignInButton mode="modal">
         <button
           type="button"
-          className="rounded-full bg-accent px-6 py-3 text-white"
+          className="rounded-full bg-accent px-6 py-3 font-medium text-white transition hover:opacity-90 focus-visible:outline-4 focus-visible:outline-accent"
         >
           Sign in to save or export
         </button>
-      </SignInButton>
+      </AppSignInButton>
     );
   return (
     <section aria-label="Save and export" className="mt-6 space-y-3">
@@ -117,11 +122,5 @@ function Controls({ input, photo, initialId, invalid, embed }: Props) {
   );
 }
 export function SaveControls(props: Props) {
-  return useAuthEnabled() ? (
-    <Controls {...props} />
-  ) : (
-    <p className="mt-6">
-      Saving is not available yet. You can keep editing and previewing.
-    </p>
-  );
+  return <Controls {...props} />;
 }

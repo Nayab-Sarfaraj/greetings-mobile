@@ -391,3 +391,17 @@ Email sending, RSVP tracking, Google Sheets import, per-guest MP4s, per-guest cu
 - Do not leave placeholders, mocked production paths, or hard-coded secrets.
 - Run typecheck, lint, and tests before declaring a task done, and say what you ran.
 - When a decision here is unclear, ask a short question instead of guessing.
+
+---
+
+## 23. SEO & GEO (Generative Engine Optimization) (LOCKED)
+
+See [`docs/seo-and-geo.md`](file:///Users/nayab.sarfaraj/Desktop/greetings-mobile/docs/seo-and-geo.md) for full maintenance procedures.
+
+- **Single source of truth:** All site brand info, contacts (`contact@cherryqube.com`, `support@cherryqube.com`), pricing, and themes live in `apps/web/src/lib/site-config.ts`. Never duplicate them.
+- **Markdown versions & content negotiation:** Every public page has a clean markdown version via `.md` suffix, `Accept: text/markdown` negotiation, and `/api/md/<path>`. Gateway rewrites are handled in `apps/web/src/proxy.ts`. Wildcards (`*/*`) or browsers always receive HTML.
+- **Central registry:** `apps/web/src/lib/md/registry.ts` maps public routes to markdown generators. Enforced by unit test `apps/web/src/lib/md/registry.test.ts` (fails if any public `page.tsx` is unmapped or omitted from `SKIPPED_ROUTES`).
+- **Machine-readable discovery:** Code-generated `/llms.txt` (llmstxt.org), `/llms-full.txt`, `/ai.txt` (ai-visibility v1.1.1), `/robots.txt`, `/sitemap.xml`, and `/api/md/_catalog`.
+- **Head signals:** Every public page includes `<meta name="ai-summary">` and `<link rel="alternate" type="text/markdown">`. Root layout injects `Organization` and `WebSite` JSON-LD. Responses set `Link: rel="describedby"` for `/llms.txt`, `/llms-full.txt`, `/ai.txt`.
+- **Private content protection:** `/c/[id]` (user creations) and `/i/[token]` (guest invitations) are strictly excluded from markdown, sitemaps, and AI discovery. They return 404 on `.md` requests, are excluded from negotiation, and emit `noindex` by default.
+- **AI crawlers:** Search/answer bots (`OAI-SearchBot`, `ChatGPT-User`, `Claude-SearchBot`, `Claude-User`, `PerplexityBot`, `Perplexity-User`) and foundation training bots (`GPTBot`, `ClaudeBot`, `Google-Extended`, `Applebot-Extended`) are allowed on public paths only. Scraping bots (`CCBot`, `Bytespider`) and private paths are blocked.

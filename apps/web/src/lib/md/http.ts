@@ -20,7 +20,10 @@ export function buildMarkdownHeaders(
   headers.set("X-Markdown-Tokens", String(tokens));
   headers.set("X-Robots-Tag", "noindex, follow");
   headers.set("Content-Location", canonicalUrl);
-  headers.set("Link", `<${canonicalUrl}>; rel="canonical"`);
+  headers.set(
+    "Link",
+    `<${canonicalUrl}>; rel="canonical", <${absoluteUrl("/llms.txt")}>; rel="describedby", <${absoluteUrl("/llms-full.txt")}>; rel="describedby", <${absoluteUrl("/ai.txt")}>; rel="describedby"`,
+  );
   headers.set("Vary", "Accept");
   headers.set(
     "Cache-Control",

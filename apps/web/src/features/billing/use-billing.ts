@@ -1,11 +1,11 @@
 "use client";
-import { useUser } from "@clerk/nextjs";
+import { useAppAuth } from "@/components/auth/app-auth";
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { PackCatalog, CheckoutStatus } from "@greetings/shared";
 import { api } from "@/lib/api-client";
 export function useCreditBalance() {
-  const { user } = useUser();
+  const { user } = useAppAuth();
   return useQuery({
     queryKey: ["credits", user?.id],
     enabled: Boolean(user),
@@ -14,7 +14,7 @@ export function useCreditBalance() {
   });
 }
 export function useBilling(prepareDraft: () => Promise<{ id: string }>) {
-  const { user } = useUser();
+  const { user } = useAppAuth();
   const client = useQueryClient();
   const [returnInfo, setReturnInfo] = useState<{
     state: string;
