@@ -36,7 +36,9 @@ export function GuestList({
           className="underline"
           onClick={() =>
             void copy(
-              guests.map((item) => `${item.name}: ${url(item.token)}`).join("\n"),
+              guests
+                .map((item) => `${item.name}: ${url(item.token)}`)
+                .join("\n"),
               "All guest links copied.",
             )
           }
@@ -47,7 +49,9 @@ export function GuestList({
       <ul className="divide-y rounded-lg border border-ink/20">
         {guests.map((guest) => {
           const phone =
-            guest.contact?.method === "phone" ? digits(guest.contact.value) : "";
+            guest.contact?.method === "phone"
+              ? digits(guest.contact.value)
+              : "";
           return (
             <li key={guest.id} className="p-3">
               <p className="font-medium">{guest.name}</p>
@@ -56,7 +60,9 @@ export function GuestList({
                 <button
                   type="button"
                   className="underline"
-                  onClick={() => void copy(url(guest.token), "Guest link copied.")}
+                  onClick={() =>
+                    void copy(url(guest.token), "Guest link copied.")
+                  }
                 >
                   Copy
                 </button>
@@ -66,7 +72,10 @@ export function GuestList({
                       type="button"
                       className="underline"
                       onClick={() => {
-                        const text = guestShareText(guest.name, url(guest.token));
+                        const text = guestShareText(
+                          guest.name,
+                          url(guest.token),
+                        );
                         window.location.assign(
                           `https://wa.me/${phone}?text=${encodeURIComponent(text)}`,
                         );
@@ -78,7 +87,9 @@ export function GuestList({
                       type="button"
                       className="underline"
                       onClick={() => {
-                        const ios = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                        const ios = /iPad|iPhone|iPod/.test(
+                          navigator.userAgent,
+                        );
                         window.location.assign(
                           smsLink(
                             guest.contact!.value,

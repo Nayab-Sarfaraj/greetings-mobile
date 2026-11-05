@@ -9,7 +9,7 @@ export default function Home() {
         Make this season feel personal.
       </h1>
       <p className="mt-5 max-w-xl text-lg">
-        Create a moving Thanksgiving greeting or invite everyone to your table.
+        Create a moving holiday greeting or invite everyone to your celebration.
       </p>
       <TemplatePicker templates={templates} />
     </main>

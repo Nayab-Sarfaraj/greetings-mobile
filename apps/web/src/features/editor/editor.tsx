@@ -263,13 +263,13 @@ export default function Editor({
                       fields.type === "card"
                         ? {
                             type: "card",
-                            themeId: "thanksgiving",
+                            themeId: fields.themeId,
                             senderName: fields.senderName,
                             recipientName: fields.recipientName,
                           }
                         : {
                             type: "invitation",
-                            themeId: "thanksgiving",
+                            themeId: fields.themeId,
                             eventTitle: fields.eventTitle,
                             hostName: fields.hostName,
                             dateTime: fields.dateTime,

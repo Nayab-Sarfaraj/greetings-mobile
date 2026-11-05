@@ -3,7 +3,7 @@ export type MessageSpelling = "us" | "uk";
 
 export type GenerateMessageInput = {
   type: "card" | "invitation";
-  themeId: "thanksgiving";
+  themeId: ThemeId;
   tone: MessageTone;
   spelling: MessageSpelling;
   relationship?: string;
@@ -20,3 +20,4 @@ export type GeneratedMessages = {
   source: "ai" | "curated";
   note?: string;
 };
+import type { ThemeId } from "./design-tokens";

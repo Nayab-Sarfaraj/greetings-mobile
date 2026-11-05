@@ -3,11 +3,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { themeNames, THEME_IDS, type ThemeId } from "@greetings/shared";
 import type { Template } from "@greetings/remotion/templates";
+import { orderTemplates } from "./template-order";
 
 export function TemplatePicker({ templates }: { templates: Template[] }) {
   const [type, setType] = useState<Template["type"]>("card");
-  const visible = templates.filter((template) => template.type === type);
+  const [theme, setTheme] = useState<ThemeId | "all">("all");
+  const visible = orderTemplates(templates).filter(
+    (template) =>
+      template.type === type && (theme === "all" || template.themeId === theme),
+  );
   return (
     <>
       <div className="mt-10 flex gap-3" role="group" aria-label="Template type">
@@ -20,6 +26,23 @@ export function TemplatePicker({ templates }: { templates: Template[] }) {
             className={`rounded-full px-5 py-3 focus-visible:outline-4 focus-visible:outline-accent ${type === option ? "bg-accent text-white" : "border border-accent"}`}
           >
             {option === "card" ? "Cards" : "Invitations"}
+          </button>
+        ))}
+      </div>
+      <div
+        className="mt-4 flex flex-wrap gap-2"
+        role="group"
+        aria-label="Holiday theme"
+      >
+        {(["all", ...THEME_IDS] as const).map((option) => (
+          <button
+            type="button"
+            key={option}
+            aria-pressed={theme === option}
+            onClick={() => setTheme(option)}
+            className={`rounded-full px-4 py-2 text-sm focus-visible:outline-4 focus-visible:outline-accent ${theme === option ? "bg-ink text-paper" : "border border-ink/30"}`}
+          >
+            {option === "all" ? "All holidays" : themeNames[option]}
           </button>
         ))}
       </div>
@@ -42,12 +65,13 @@ export function TemplatePicker({ templates }: { templates: Template[] }) {
             <div className="p-5">
               <p className="text-sm text-accent">
                 {template.type === "card"
-                  ? "Animated card · 7 sec"
-                  : "Video invitation · 25 sec"}
+                  ? `Animated card · ${template.scenes.reduce((total, scene) => total + scene.seconds, 0)} sec`
+                  : `Video invitation · ${template.scenes.reduce((total, scene) => total + scene.seconds, 0)} sec`}
               </p>
+              <p className="mt-1 text-sm">{themeNames[template.themeId]}</p>
               <h2 className="mt-2 font-display text-2xl">{template.title}</h2>
               <p className="mt-3 underline underline-offset-4">
-                Customize template
+                Start customizing
               </p>
             </div>
           </Link>

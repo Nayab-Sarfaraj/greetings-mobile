@@ -19,7 +19,11 @@ export const guestRepository = {
     await connectDb();
     return Guest.find({ invitationId }).sort({ nameKey: 1 }).lean();
   },
-  async saveBatch(invitationId: string, guests: StoredInput[], maximum: number) {
+  async saveBatch(
+    invitationId: string,
+    guests: StoredInput[],
+    maximum: number,
+  ) {
     await connectDb();
     await Promise.all([Guest.init(), Invitation.init()]);
     const session = await mongoose.startSession();
@@ -27,7 +31,10 @@ export const guestRepository = {
     try {
       await session.withTransaction(async () => {
         const keys = guests.map((item) => item.nameKey);
-        const existing = await Guest.find({ invitationId, nameKey: { $in: keys } })
+        const existing = await Guest.find({
+          invitationId,
+          nameKey: { $in: keys },
+        })
           .session(session)
           .lean();
         const byKey = new Map(existing.map((item) => [item.nameKey, item]));
@@ -124,7 +131,9 @@ export const guestRepository = {
   },
   async findPublic(token: string) {
     await connectDb();
-    const guest = await Guest.findOne({ token }).select("name invitationId").lean();
+    const guest = await Guest.findOne({ token })
+      .select("name invitationId")
+      .lean();
     if (!guest) return null;
     const invitation = await Invitation.findOne({
       _id: guest.invitationId,

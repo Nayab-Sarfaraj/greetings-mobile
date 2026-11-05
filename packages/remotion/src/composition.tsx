@@ -5,150 +5,17 @@ import {
   Img,
   Sequence,
   interpolate,
-  spring,
   useCurrentFrame,
-  useVideoConfig,
 } from "remotion";
-import { palettes, FPS } from "@greetings/shared";
+import { FPS } from "@greetings/shared";
+import { CornerCluster, Wreath } from "./flora";
 import { fonts } from "./fonts";
 import type { VideoProps } from "./schema";
-import { getTemplate } from "./templates";
-const color = palettes.thanksgiving;
-export function Bloom({
-  x,
-  y,
-  size = 160,
-}: {
-  x: number;
-  y: number;
-  size?: number;
-}) {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const scale = spring({ frame, fps, config: { damping: 18 } });
-  return (
-    <svg
-      width={size}
-      height={size}
-      style={{
-        position: "absolute",
-        left: x,
-        top: y,
-        transform: `scale(${scale})`,
-      }}
-      viewBox="0 0 100 100"
-      aria-hidden="true"
-    >
-      <g fill={color.marigold}>
-        {Array.from({ length: 12 }, (_, i) => (
-          <ellipse
-            key={i}
-            cx="50"
-            cy="25"
-            rx="9"
-            ry="23"
-            transform={`rotate(${i * 30} 50 50)`}
-          />
-        ))}
-      </g>
-      <circle cx="50" cy="50" r="16" fill={color.oxblood} />
-    </svg>
-  );
-}
-export function Leaf({
-  x,
-  y,
-  rotate = 0,
-}: {
-  x: number;
-  y: number;
-  rotate?: number;
-}) {
-  const frame = useCurrentFrame();
-  return (
-    <svg
-      width="130"
-      height="130"
-      style={{
-        position: "absolute",
-        left: x,
-        top: y,
-        transform: `translateY(${Math.sin(frame / 28) * 10}px) rotate(${rotate}deg)`,
-      }}
-      viewBox="0 0 100 100"
-      aria-hidden="true"
-    >
-      <path
-        d="M50 5 Q80 25 88 55 Q70 90 50 82 Q22 94 12 55 Q20 24 50 5Z"
-        fill={color.olive}
-      />
-      <path
-        d="M50 80V100M50 80L24 44M50 80L74 42"
-        stroke={color.paper}
-        strokeWidth="3"
-      />
-    </svg>
-  );
-}
-export function Wheat({ x, y }: { x: number; y: number }) {
-  return (
-    <svg
-      width="110"
-      height="210"
-      style={{ position: "absolute", left: x, top: y }}
-      viewBox="0 0 110 210"
-      aria-hidden="true"
-    >
-      <path d="M52 195V20" stroke={color.olive} strokeWidth="5" />
-      {[25, 55, 85, 115].map((top) => (
-        <g key={top} fill={color.marigold}>
-          <ellipse
-            cx="35"
-            cy={top}
-            rx="12"
-            ry="26"
-            transform={`rotate(-35 35 ${top})`}
-          />
-          <ellipse
-            cx="69"
-            cy={top + 12}
-            rx="12"
-            ry="26"
-            transform={`rotate(35 69 ${top + 12})`}
-          />
-        </g>
-      ))}
-    </svg>
-  );
-}
-export function Vine() {
-  return (
-    <>
-      <Leaf x={80} y={110} rotate={-25} />
-      <Leaf x={790} y={180} rotate={30} />
-      <Wheat x={80} y={1450} />
-      <Wheat x={880} y={1430} />
-    </>
-  );
-}
-export function CornerCluster() {
-  return (
-    <>
-      <Bloom x={-35} y={90} />
-      <Bloom x={860} y={140} size={230} />
-      <Vine />
-    </>
-  );
-}
-export function Wreath() {
-  return (
-    <>
-      <Bloom x={170} y={220} size={180} />
-      <Bloom x={730} y={190} size={170} />
-      <Leaf x={390} y={180} />
-    </>
-  );
-}
+import { getTemplateForProps } from "./templates";
+import { getTheme } from "./themes";
+
+export { Bloom, CornerCluster, Leaf, Vine, Wheat, Wreath } from "./flora";
+
 function FitText({
   children,
   size = 100,
@@ -159,10 +26,9 @@ function FitText({
   script?: boolean;
 }) {
   const frame = useCurrentFrame();
-  const length = children.length;
   const fontSize = Math.max(
     size * 0.56,
-    Math.min(size, (size * 30) / Math.max(30, length)),
+    Math.min(size, (size * 30) / Math.max(30, children.length)),
   );
   return (
     <div
@@ -186,27 +52,31 @@ function FitText({
     </div>
   );
 }
+
+function eventDetails(props: Extract<VideoProps, { type: "invitation" }>) {
+  const date = new Date(
+    `${props.dateTime.slice(0, 10)}T00:00:00Z`,
+  ).toLocaleDateString("en-US", { dateStyle: "long", timeZone: "UTC" });
+  const offset = props.dateTime.endsWith("Z")
+    ? "+00:00"
+    : props.dateTime.slice(-6);
+  return `${date} at ${props.dateTime.slice(11, 16)} UTC${offset}\n${props.locationText}`;
+}
+
 function Scene({ props, id }: { props: VideoProps; id: string }) {
   const frame = useCurrentFrame();
+  const theme = getTheme(props.themeId);
   const opacity = interpolate(frame, [0, 20, 75], [0, 1, 1], {
     extrapolateRight: "clamp",
   });
   const isCard = props.type === "card";
-  const title = isCard ? "With gratitude" : props.eventTitle;
-  const localEventDate = !isCard
-    ? new Date(`${props.dateTime.slice(0, 10)}T00:00:00Z`).toLocaleDateString(
-        "en-US",
-        { dateStyle: "long", timeZone: "UTC" },
-      )
-    : "";
-  const localEventTime = !isCard
-    ? `${props.dateTime.slice(11, 16)} UTC${props.dateTime.endsWith("Z") ? "+00:00" : props.dateTime.slice(-6)}`
-    : "";
   const subtitle =
     id === "intro"
-      ? title
+      ? isCard
+        ? "A little something for you"
+        : props.eventTitle
       : id === "details" && !isCard
-        ? `${localEventDate} at ${localEventTime}\n${props.locationText}`
+        ? eventDetails(props)
         : id === "guest-name" && !isCard
           ? (props.guestName ?? props.hostName)
           : isCard
@@ -215,8 +85,8 @@ function Scene({ props, id }: { props: VideoProps; id: string }) {
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: color.paper,
-        color: color.ink,
+        backgroundColor: theme.background,
+        color: theme.ink,
         alignItems: "center",
         justifyContent: "center",
         fontFamily: fonts.display,
@@ -224,7 +94,8 @@ function Scene({ props, id }: { props: VideoProps; id: string }) {
         textAlign: "center",
       }}
     >
-      <CornerCluster />
+      <CornerCluster theme={theme} />
+      {id === "intro" && <Wreath theme={theme} />}
       <div
         style={{
           opacity,
@@ -241,10 +112,10 @@ function Scene({ props, id }: { props: VideoProps; id: string }) {
             fontSize: 36,
             letterSpacing: 6,
             textTransform: "uppercase",
-            color: color.oxblood,
+            color: theme.accent,
           }}
         >
-          Thanksgiving
+          {theme.label}
         </div>
         {isCard && id === "closing" && props.recipientName && (
           <div style={{ fontFamily: fonts.body, fontSize: 36 }}>
@@ -276,7 +147,7 @@ function Scene({ props, id }: { props: VideoProps; id: string }) {
                 width: 500,
                 height: 450,
                 objectFit: "cover",
-                border: `12px solid ${color.oxblood}`,
+                border: `12px solid ${theme.photoBorder}`,
               }}
             />
           )}
@@ -284,13 +155,13 @@ function Scene({ props, id }: { props: VideoProps; id: string }) {
     </AbsoluteFill>
   );
 }
+
 export function GreetingComposition(
   props: VideoProps & { watermark?: boolean },
 ) {
-  const template = getTemplate(
-    props.type === "card" ? "harvest-card" : "harvest-invitation",
-  );
+  const template = getTemplateForProps(props.type, props.themeId);
   if (!template) return null;
+  const theme = getTheme(props.themeId);
   let from = 0;
   return (
     <>
@@ -310,7 +181,7 @@ export function GreetingComposition(
             justifyContent: "flex-end",
             alignItems: "center",
             paddingBottom: 85,
-            color: color.oxblood,
+            color: theme.accent,
             fontFamily: fonts.body,
             fontSize: 32,
           }}

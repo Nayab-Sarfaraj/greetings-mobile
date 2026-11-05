@@ -339,6 +339,9 @@ deep links, deletion cascade, and local verification are documented in
 
 ## Phase 9 — Remaining themes and polish
 
+The shared-theme implementation, local render evidence, accessibility pass, and
+remaining device/deployment checks are documented in `docs/stage-9.md`.
+
 **Goal:** all three themes in both formats, with production polish.
 
 **Build**

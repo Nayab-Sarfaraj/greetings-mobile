@@ -4,7 +4,9 @@ import { parseGuestCsv } from "./guest-csv";
 describe("guest CSV", () => {
   it("parses quoted names and contacts", () => {
     expect(
-      parseGuestCsv('name,contact\n"Doe, Sam",sam@example.com\nAlex,+15551234567'),
+      parseGuestCsv(
+        'name,contact\n"Doe, Sam",sam@example.com\nAlex,+15551234567',
+      ),
     ).toEqual({
       guests: [
         {

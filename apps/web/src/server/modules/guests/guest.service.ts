@@ -4,10 +4,7 @@ import { NotFoundError, ValidationError } from "../../lib/errors";
 import { rateLimit } from "../../lib/rate-limit";
 import { invitationService } from "../invitations/invitation.service";
 import { invitationInput } from "../invitations/invitation.schema";
-import {
-  GuestCapacityError,
-  guestRepository,
-} from "./guest.repository";
+import { GuestCapacityError, guestRepository } from "./guest.repository";
 import type { GuestInputRecord } from "./guest.schema";
 
 const MAX_GUESTS = 200;
@@ -20,7 +17,11 @@ function normalized(input: GuestInputRecord) {
     .trim();
   if (!name || name.length > 40)
     throw new ValidationError("Guest name must be between 1 and 40 characters");
-  return { name, nameKey: name.toLocaleLowerCase("en-US"), contact: input.contact };
+  return {
+    name,
+    nameKey: name.toLocaleLowerCase("en-US"),
+    contact: input.contact,
+  };
 }
 
 function checkId(id: string) {
@@ -63,7 +64,9 @@ export function createGuestService(deps: Dependencies) {
         );
       } catch (error) {
         if (error instanceof GuestCapacityError)
-          throw new ValidationError("An invitation can have at most 200 guests");
+          throw new ValidationError(
+            "An invitation can have at most 200 guests",
+          );
         if ((error as { code?: number }).code !== 11000 || attempt === 2)
           throw error;
       }

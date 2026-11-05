@@ -8,7 +8,10 @@ import { localRenderConfig } from "@/server/lib/config";
 
 export const readGuestInvitation = cache(async (token: string) => {
   const incoming = await headers();
-  const ip = incoming.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const ip =
+    incoming.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    incoming.get("x-real-ip")?.trim() ||
+    "unidentified";
   try {
     return await guestService.public(token, ip);
   } catch (error) {

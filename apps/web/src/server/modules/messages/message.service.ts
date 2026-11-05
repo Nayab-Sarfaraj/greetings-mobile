@@ -12,7 +12,7 @@ import type { MessageInput } from "./message.schema";
 const unsafe =
   /(?:https?:\/\/|www\.|<\/?[a-z]|ignore\s+(?:all\s+)?(?:previous|prior)|\b(?:suicide|murder|rape|porn|nazi|fuck|shit|bitch)\b)/i;
 const relevant =
-  /\b(?:thank\w*|grat\w*|turkey|pie|gather\w*|feast|join\w*|invit\w*|celebrat\w*|warm\w*|wish\w*|table|company|heart|home)\b/i;
+  /\b(?:thank\w*|grat\w*|turkey|pie|christmas|evergreen|season|new\s+year|midnight|toast|gather\w*|feast|join\w*|invit\w*|celebrat\w*|warm\w*|wish\w*|table|company|heart|home)\b/i;
 
 function clean(value: string) {
   const result = value
@@ -47,6 +47,77 @@ function curated(input: MessageInput) {
   const recipient = recipientName ? `${recipientName}, ` : "";
   const sender = senderName ? ` — ${senderName}` : "";
   const favourite = input.spelling === "uk" ? "favourite" : "favorite";
+  const holiday =
+    input.themeId === "christmas"
+      ? {
+          name: "Christmas",
+          gathering: "Christmas gathering",
+          symbol: "season",
+        }
+      : input.themeId === "new-year"
+        ? {
+            name: "the New Year",
+            gathering: "New Year’s Eve gathering",
+            symbol: "midnight",
+          }
+        : {
+            name: "Thanksgiving",
+            gathering: "Thanksgiving gathering",
+            symbol: "gratitude",
+          };
+  if (input.themeId !== "thanksgiving") {
+    if (input.type === "card") {
+      const variants = {
+        warm: [
+          `${recipient}wishing you a bright ${holiday.name} filled with warmth, joy, and your ${favourite} people.${sender}`,
+          `${recipient}may ${holiday.name} bring a full heart, a happy home, and beautiful moments to remember.${sender}`,
+          `${recipient}sending warm wishes for ${holiday.name} and so much happiness in the season ahead.${sender}`,
+        ],
+        funny: [
+          `${recipient}wishing you a ${holiday.name} with great company, excellent snacks, and zero pressure to stay up late.${sender}`,
+          `${recipient}may your ${holiday.name} be merry, bright, and just the right amount of sparkly.${sender}`,
+          `${recipient}here’s to ${holiday.name}, good stories, and a celebration worth toasting.${sender}`,
+        ],
+        formal: [
+          `${recipient}please accept my warmest wishes for a peaceful and joyful ${holiday.name}.${sender}`,
+          `${recipient}wishing you and those close to you a meaningful ${holiday.name} celebration.${sender}`,
+          `${recipient}may ${holiday.name} bring happiness, reflection, and many reasons to celebrate.${sender}`,
+        ],
+        "short-sweet": [
+          `${recipient}warm wishes for a happy ${holiday.name}.${sender}`,
+          `${recipient}wishing you joy this ${holiday.name}.${sender}`,
+          `${recipient}cheers to a bright ${holiday.name}.${sender}`,
+        ],
+      } as const;
+      return variants[input.tone].map(fit);
+    }
+    const event = fragment(input.eventTitle) || `our ${holiday.gathering}`;
+    const hostName = fragment(input.hostName);
+    const host = hostName ? ` — ${hostName}` : "";
+    const variants = {
+      warm: [
+        `Please join us for ${event}. We would love to share the warmth of the ${holiday.symbol} with you.${host}`,
+        `Our ${holiday.name} would be brighter with you there. Please join us for ${event}.${host}`,
+        `Come celebrate with us at ${event}. Your company would make the evening truly special.${host}`,
+      ],
+      funny: [
+        `Come celebrate at ${event}—good company and excellent snacks are highly encouraged.${host}`,
+        `You are invited to ${event}: bring your best story and leave room for dessert.${host}`,
+        `Join us for ${event}. We will bring the celebration; you bring the good cheer.${host}`,
+      ],
+      formal: [
+        `You are cordially invited to ${event}. We would be delighted to celebrate in your company.${host}`,
+        `Please join us for ${event} as we gather to mark ${holiday.name} together.${host}`,
+        `It would be our pleasure to welcome you to ${event} for a thoughtful celebration.${host}`,
+      ],
+      "short-sweet": [
+        `Join us for ${event}. We would love to celebrate with you.${host}`,
+        `You are invited to ${event}. Come share the season with us.${host}`,
+        `Save the date for ${event}—we hope you can join us!${host}`,
+      ],
+    } as const;
+    return variants[input.tone].map(fit);
+  }
   if (input.type === "card") {
     const variants = {
       warm: [

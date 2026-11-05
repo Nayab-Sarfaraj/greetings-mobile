@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Player, type PlayerRef } from "@remotion/player";
 import {
   GreetingComposition,
@@ -19,6 +19,20 @@ export default function Preview({
   const player = useRef<PlayerRef>(null);
   const [playing, setPlaying] = useState(true);
   const [muted, setMuted] = useState(true);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => {
+      setReducedMotion(query.matches);
+      if (query.matches) {
+        player.current?.pause();
+        setPlaying(false);
+      }
+    };
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
   return (
     <div>
       <Player
@@ -29,8 +43,8 @@ export default function Preview({
         fps={FPS}
         compositionWidth={VIDEO_SIZE.width}
         compositionHeight={VIDEO_SIZE.height}
-        autoPlay
-        loop
+        autoPlay={!reducedMotion}
+        loop={!reducedMotion}
         initiallyMuted
         style={{ width: "100%", aspectRatio: "9 / 16" }}
       />

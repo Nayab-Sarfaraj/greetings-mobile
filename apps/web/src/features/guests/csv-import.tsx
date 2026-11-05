@@ -22,7 +22,9 @@ export function CsvImport({
     if (!review?.guests.length) return;
     if (
       review.errors.length &&
-      !confirm(`Skip ${review.errors.length} invalid row(s) and import the rest?`)
+      !confirm(
+        `Skip ${review.errors.length} invalid row(s) and import the rest?`,
+      )
     )
       return;
     onImport(review.guests);
@@ -73,7 +75,9 @@ export function CsvImport({
             onClick={submit}
             className="mt-2 rounded-full border px-4 py-2 disabled:opacity-50"
           >
-            {pending ? "Importing…" : `Import ${review.guests.length} valid rows`}
+            {pending
+              ? "Importing…"
+              : `Import ${review.guests.length} valid rows`}
           </button>
         </div>
       )}

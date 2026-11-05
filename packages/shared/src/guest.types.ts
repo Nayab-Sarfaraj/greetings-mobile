@@ -1,6 +1,5 @@
 export type GuestContact =
-  | { method: "email"; value: string }
-  | { method: "phone"; value: string };
+  { method: "email"; value: string } | { method: "phone"; value: string };
 
 export type GuestInput = { name: string; contact?: GuestContact };
 
@@ -15,4 +14,3 @@ export type GuestImportResult = {
   created: number;
   updated: number;
 };
-

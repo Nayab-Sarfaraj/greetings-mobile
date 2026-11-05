@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FPS, MAX_VIDEO_SECONDS } from "@greetings/shared";
+import { FPS, MAX_VIDEO_SECONDS, THEME_IDS } from "@greetings/shared";
 import { cardSchema, invitationSchema } from "./schema";
 import { durationInFrames, templates } from "./templates";
 describe("template contract", () => {
@@ -16,6 +16,21 @@ describe("template contract", () => {
           template.defaultProps,
         ).success,
       ).toBe(true);
+  });
+  it("ships a card and invitation for every holiday", () => {
+    expect(templates).toHaveLength(6);
+    for (const themeId of THEME_IDS) {
+      expect(
+        templates.some(
+          (item) => item.themeId === themeId && item.type === "card",
+        ),
+      ).toBe(true);
+      expect(
+        templates.some(
+          (item) => item.themeId === themeId && item.type === "invitation",
+        ),
+      ).toBe(true);
+    }
   });
   it("shows the guest name in the final scene", () => {
     expect(

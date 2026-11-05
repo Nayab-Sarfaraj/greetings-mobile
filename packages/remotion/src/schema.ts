@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { MESSAGE_MAX_CHARS } from "@greetings/shared";
+import { MESSAGE_MAX_CHARS, THEME_IDS } from "@greetings/shared";
 const name = z.string().trim().min(1).max(40);
 const message = z.string().trim().min(1).max(MESSAGE_MAX_CHARS);
 export const cardSchema = z.object({
   type: z.literal("card"),
-  themeId: z.literal("thanksgiving"),
+  themeId: z.enum(THEME_IDS),
   senderName: name,
   recipientName: name.optional(),
   message,
@@ -12,7 +12,7 @@ export const cardSchema = z.object({
 });
 export const invitationSchema = z.object({
   type: z.literal("invitation"),
-  themeId: z.literal("thanksgiving"),
+  themeId: z.enum(THEME_IDS),
   eventTitle: z.string().trim().min(1).max(70),
   hostName: name,
   dateTime: z.iso.datetime({ offset: true }),

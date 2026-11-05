@@ -6,7 +6,9 @@ import { GuestCapacityError } from "./guest.repository";
 function setup() {
   const repository = {
     list: vi.fn().mockResolvedValue([]),
-    saveBatch: vi.fn().mockResolvedValue({ guests: [], created: 1, updated: 0 }),
+    saveBatch: vi
+      .fn()
+      .mockResolvedValue({ guests: [], created: 1, updated: 0 }),
     remove: vi.fn(),
     removeAll: vi.fn(),
     findPublic: vi.fn(),
@@ -93,9 +95,9 @@ describe("guest service", () => {
 
   it("rejects malformed tokens before querying Mongo", async () => {
     const test = setup();
-    await expect(test.service.public("bad", "203.0.113.4")).rejects.toMatchObject(
-      { status: 404 },
-    );
+    await expect(
+      test.service.public("bad", "203.0.113.4"),
+    ).rejects.toMatchObject({ status: 404 });
     expect(test.repository.findPublic).not.toHaveBeenCalled();
   });
 });

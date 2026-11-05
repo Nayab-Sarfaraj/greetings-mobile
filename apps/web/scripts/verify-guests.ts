@@ -50,7 +50,10 @@ async function verify() {
   if (tokens.size !== 20) throw new Error("Guest tokens are not unique");
   for (const guest of imported.guests) {
     const publicItem = await guestService.public(guest.token, "127.0.0.1");
-    if (publicItem.guestName !== guest.name || publicItem.props.guestName !== guest.name)
+    if (
+      publicItem.guestName !== guest.name ||
+      publicItem.props.guestName !== guest.name
+    )
       throw new Error("Guest personalization mismatch");
   }
   const token = imported.guests[0].token;
@@ -82,7 +85,8 @@ async function verify() {
     Render.countDocuments({ invitationIds: id }),
     Invitation.countDocuments({ _id: id }),
   ]);
-  if (remaining.some(Boolean)) throw new Error("Cascade deletion was incomplete");
+  if (remaining.some(Boolean))
+    throw new Error("Cascade deletion was incomplete");
   try {
     await access(renderPath);
     throw new Error("Render fixture was not removed");

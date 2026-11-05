@@ -60,6 +60,18 @@ describe("message generation", () => {
     }
   });
 
+  it("uses the selected holiday in curated fallbacks", async () => {
+    const test = setup(async () => {
+      throw new Error("offline");
+    });
+    const result = await test.service.generate("owner", undefined, {
+      ...base,
+      themeId: "christmas",
+    });
+    expect(result.variants.every((item) => /christmas/i.test(item))).toBe(true);
+    expect(result.variants.join(" ")).not.toMatch(/thanksgiving/i);
+  });
+
   it("cleans valid provider output and records token usage", async () => {
     const test = setup();
     const result = await test.service.generate("owner", undefined, base);

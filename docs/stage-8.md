@@ -50,7 +50,8 @@ The RSVP buttons open a prefilled message and do not send or record anything:
 
 - email uses `mailto:` with subject and body;
 - WhatsApp uses `wa.me` with normalized digits;
-- SMS uses `&body=` on iOS and `?body=` on Android and other platforms.
+- SMS uses the commonly supported `&body=` form on iOS and `?body=` on Android
+  and other platforms as a best-effort prefill.
 
 The host contact is displayed because anyone with the guest link needs it to
 reply. Unknown, malformed, or altered tokens use the same generic not-found
@@ -73,6 +74,8 @@ Account deletion also removes guest rows and stored creation data.
   tokens and correct per-token names, rejects an altered token, and verifies
   invitation deletion removes guest records, render rows, and the render file.
   The script cleans its database fixtures and local media afterward.
+- A production-server smoke check confirmed an unknown 22-character token
+  returns HTTP 404 with only the generic not-found copy and no private fields.
 - Run the integration check with:
 
 ```sh
@@ -80,3 +83,10 @@ MONGODB_URI='mongodb://127.0.0.1:27017/greetings_stage8_test?replicaSet=rs0' \
 LOCAL_MEDIA_DIR='./.media-stage8-test' \
 pnpm --filter @greetings/web exec tsx scripts/verify-guests.ts
 ```
+
+Opening the prefilled RSVP drafts in the installed WhatsApp, Messages, and mail
+apps still needs final QA on a physical iPhone and Android device. The URL
+builders and their platform-specific separators are covered by unit tests.
+Apple's published `sms:` URL documentation only guarantees the recipient and
+does not formally guarantee message-body parameters, so the user can still
+review or type the response if an iOS version omits the prefill.

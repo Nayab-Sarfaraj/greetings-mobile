@@ -3,7 +3,13 @@ import { Component, type ReactNode } from "react";
 import type { VideoProps } from "@greetings/remotion/schema";
 import Preview from "../editor/preview";
 
-function Fallback({ videoUrl, posterUrl }: { videoUrl?: string; posterUrl?: string }) {
+function Fallback({
+  videoUrl,
+  posterUrl,
+}: {
+  videoUrl?: string;
+  posterUrl?: string;
+}) {
   return videoUrl ? (
     <video
       src={videoUrl}
@@ -16,8 +22,8 @@ function Fallback({ videoUrl, posterUrl }: { videoUrl?: string; posterUrl?: stri
     />
   ) : (
     <div role="alert" className="rounded-xl border border-ink/20 p-8">
-      The live invitation could not be opened. Please ask the host for the shared
-      invitation video.
+      The live invitation could not be opened. Please ask the host for the
+      shared invitation video.
     </div>
   );
 }
@@ -47,7 +53,9 @@ export function GuestPlayer({
   posterUrl?: string;
 }) {
   return (
-    <PlayerBoundary fallback={<Fallback videoUrl={videoUrl} posterUrl={posterUrl} />}>
+    <PlayerBoundary
+      fallback={<Fallback videoUrl={videoUrl} posterUrl={posterUrl} />}
+    >
       <Preview templateId={templateId} props={props} />
     </PlayerBoundary>
   );

@@ -18,7 +18,9 @@ export default async function GuestInvitationPage({ params }: Props) {
   const invitation = await readGuestInvitation((await params).token);
   return (
     <main className="mx-auto max-w-3xl px-5 py-10">
-      <p className="text-sm uppercase tracking-[0.2em]">A personal invitation</p>
+      <p className="text-sm uppercase tracking-[0.2em]">
+        A personal invitation
+      </p>
       <h1 className="mt-2 font-display text-4xl leading-tight">
         You’re invited, {invitation.guestName}
       </h1>

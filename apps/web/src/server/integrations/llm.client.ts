@@ -31,10 +31,16 @@ const responseSchema = {
 };
 
 function prompt(input: MessageInput) {
+  const holiday =
+    input.themeId === "christmas"
+      ? "Christmas"
+      : input.themeId === "new-year"
+        ? "New Year’s Eve"
+        : "Thanksgiving";
   const occasion =
     input.type === "card"
-      ? "Thanksgiving greeting card"
-      : "Thanksgiving event invitation";
+      ? `${holiday} greeting card`
+      : `${holiday} event invitation`;
   return JSON.stringify({
     occasion,
     tone: input.tone,
