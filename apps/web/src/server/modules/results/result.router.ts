@@ -32,6 +32,7 @@ export async function download(_request: Request, context: Context) {
       );
     const target = new URL(result.videoUrl);
     target.searchParams.set("download", "1");
+    target.searchParams.set("filename", `${result.theme}-${result.type}.mp4`);
     return new Response(null, {
       status: 302,
       headers: {

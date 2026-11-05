@@ -23,14 +23,11 @@ function setup(status = "ready") {
       },
     },
   });
-  const sweep = vi.fn();
   return {
     find,
-    sweep,
-    service: createResultService(
-      { find } as unknown as Parameters<typeof createResultService>[0],
-      sweep,
-    ),
+    service: createResultService({ find } as unknown as Parameters<
+      typeof createResultService
+    >[0]),
   };
 }
 describe("public results", () => {

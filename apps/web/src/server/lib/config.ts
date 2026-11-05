@@ -43,8 +43,11 @@ export function publicAuthKey() {
   return authEnabled() ? getAuthConfig().publishableKey : null;
 }
 export function localRenderConfig() {
+  const raw = z
+    .url()
+    .parse(process.env.APP_BASE_URL ?? "http://localhost:3000");
   return {
-    appUrl: z.url().parse(process.env.APP_BASE_URL ?? "http://localhost:3000"),
+    appUrl: raw.replace(/\/$/, ""),
     root: process.env.LOCAL_MEDIA_DIR ?? "./.media",
   };
 }

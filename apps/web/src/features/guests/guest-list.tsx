@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import type { Guest } from "@greetings/shared";
-import { digits, guestShareText, smsLink } from "./guest-share";
+import { digits, guestShareText, smsLink, smsPhone } from "./guest-share";
 
 function url(token: string) {
   return new URL(`/i/${token}`, window.location.origin).toString();
@@ -52,6 +52,10 @@ export function GuestList({
             guest.contact?.method === "phone"
               ? digits(guest.contact.value)
               : "";
+          const smsNumber =
+            guest.contact?.method === "phone"
+              ? smsPhone(guest.contact.value)
+              : "";
           return (
             <li key={guest.id} className="p-3">
               <p className="font-medium">{guest.name}</p>
@@ -76,8 +80,10 @@ export function GuestList({
                           guest.name,
                           url(guest.token),
                         );
-                        window.location.assign(
+                        window.open(
                           `https://wa.me/${phone}?text=${encodeURIComponent(text)}`,
+                          "_blank",
+                          "noopener,noreferrer",
                         );
                       }}
                     >
@@ -87,12 +93,13 @@ export function GuestList({
                       type="button"
                       className="underline"
                       onClick={() => {
-                        const ios = /iPad|iPhone|iPod/.test(
-                          navigator.userAgent,
-                        );
+                        const ios =
+                          /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                          (navigator.platform === "MacIntel" &&
+                            navigator.maxTouchPoints > 1);
                         window.location.assign(
                           smsLink(
-                            guest.contact!.value,
+                            smsNumber,
                             guestShareText(guest.name, url(guest.token)),
                             ios,
                           ),

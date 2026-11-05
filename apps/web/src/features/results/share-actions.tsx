@@ -40,7 +40,13 @@ export function ShareActions({
       const response = await fetch(videoUrl);
       if (!response.ok) throw new Error();
       const blob = await response.blob();
-      const prepared = new File([blob], "seasonal-card.mp4", {
+      // Derive a readable filename from the card/invitation title.
+      const slug = title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+        .slice(0, 60);
+      const prepared = new File([blob], `${slug || "seasonal-card"}.mp4`, {
         type: "video/mp4",
       });
       if (navigator.canShare?.({ files: [prepared] })) {

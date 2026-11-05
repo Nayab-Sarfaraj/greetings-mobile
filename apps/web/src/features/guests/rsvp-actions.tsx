@@ -11,10 +11,14 @@ export function RsvpActions({
   eventTitle: string;
 }) {
   function reply(attending: boolean) {
-    const ios = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    window.location.assign(
-      rsvpLink(contact, guestName, eventTitle, attending, ios),
-    );
+    const ios =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const url = rsvpLink(contact, guestName, eventTitle, attending, ios);
+    // WhatsApp links are https:// — open in a new tab so the guest keeps this page.
+    if (contact.method === "whatsapp")
+      window.open(url, "_blank", "noopener,noreferrer");
+    else window.location.assign(url);
   }
   return (
     <section className="mt-8 rounded-xl border border-ink/20 p-5">

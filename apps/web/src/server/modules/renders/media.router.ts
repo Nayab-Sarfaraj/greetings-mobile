@@ -16,9 +16,13 @@ export async function get(
       "X-Content-Type-Options": "nosniff",
       "Accept-Ranges": "bytes",
     };
-    if (new URL(request.url).searchParams.has("download"))
-      headers["Content-Disposition"] =
-        'attachment; filename="seasonal-card.mp4"';
+    if (new URL(request.url).searchParams.has("download")) {
+      const sp = new URL(request.url).searchParams;
+      const raw = sp.get("filename") ?? "seasonal-card.mp4";
+      // Allow only safe filename characters to prevent header injection.
+      const filename = raw.replace(/[^a-z0-9._-]/gi, "-").slice(0, 64);
+      headers["Content-Disposition"] = `attachment; filename="${filename}"`;
+    }
     const range = request.headers.get("range");
     if (range) {
       const match = /^bytes=(\d*)-(\d*)$/.exec(range);

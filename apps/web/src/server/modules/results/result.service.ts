@@ -1,15 +1,10 @@
 import type { PublicResult } from "@greetings/shared";
 import { resultRepository } from "./result.repository";
 import { NotFoundError } from "../../lib/errors";
-import { renderRepository } from "../renders/render.repository";
-export function createResultService(
-  repository: typeof resultRepository,
-  sweep = () => renderRepository.sweep(),
-) {
+export function createResultService(repository: typeof resultRepository) {
   return {
     async get(id: string): Promise<PublicResult> {
       if (!/^[A-Za-z0-9_-]{22}$/.test(id)) throw new NotFoundError();
-      await sweep();
       const item = await repository.find(id);
       if (!item) throw new NotFoundError();
       const { render } = item;
